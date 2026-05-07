@@ -1,0 +1,356 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.25rem 0;max-width:680px;font-family:var(--font-sans)}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.kpi label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+.kpi span{font-size:19px;font-weight:500;color:var(--color-text-primary)}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.stage{padding:.85rem .75rem;border-right:0.5px solid var(--color-border-tertiary);text-align:center}
+.stage:last-child{border-right:none}
+.stage-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.stage-count{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.stage-time{font-size:11px;color:var(--color-text-secondary)}
+.stage-bar{height:3px;border-radius:2px;margin-top:8px}
+
+/* Week pills */
+.week-section{margin-bottom:1.25rem}
+.week-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.week-section-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.4px}
+.week-clear{font-size:11px;color:var(--color-text-secondary);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
+.week-pills{display:flex;gap:6px;flex-wrap:wrap}
+.wpill{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);cursor:pointer;user-select:none;padding:6px 10px;transition:all .12s;min-width:130px}
+.wpill:hover{border-color:var(--color-border-primary)}
+.wpill.active{background:#185FA5;border-color:#185FA5}
+.wpill-code{font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:1px}
+.wpill.active .wpill-code{color:rgba(255,255,255,.75)}
+.wpill-range{font-size:12px;color:var(--color-text-primary);line-height:1.3}
+.wpill.active .wpill-range{color:#fff}
+.wpill-count{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+.wpill.active .wpill-count{color:rgba(255,255,255,.65)}
+.wpill-all{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);cursor:pointer;padding:6px 12px;font-size:12px;color:var(--color-text-secondary);font-weight:500}
+.wpill-all.active{background:var(--color-background-secondary);border-color:var(--color-border-primary);color:var(--color-text-primary)}
+
+.filter-row{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.filter-row input{flex:1;min-width:150px}
+.filter-row select{width:155px}
+.table-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.25rem}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{background:var(--color-background-secondary);padding:8px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500}
+.b-pend{background:#FAEEDA;color:#854F0B}
+.b-pfact{background:#E6F1FB;color:#185FA5}
+.b-can{background:#FCEBEB;color:#A32D2D}
+.b-fail{background:#FAEEDA;color:#993C1D}
+.b-fact{background:#EAF3DE;color:#3B6D11}
+.b-trans{background:#E1F5EE;color:#0F6E56}
+.btn-det{font-size:11px;color:var(--color-text-secondary);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
+.detail{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.1rem;margin-bottom:1.25rem;display:none}
+.detail.open{display:block}
+.det-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem}
+.det-title{font-size:14px;font-weight:500}
+.det-close{background:none;border:none;font-size:17px;cursor:pointer;color:var(--color-text-secondary)}
+.det-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.meta-f label{font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:2px}
+.meta-f span{font-size:12px;color:var(--color-text-primary)}
+.sec-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;margin-top:12px}
+.sec-title:first-of-type{margin-top:0}
+.transport-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.9rem 1rem;margin-bottom:.5rem;display:grid;grid-template-columns:44px 1fr 1fr;gap:12px;align-items:center}
+.avatar{width:40px;height:40px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;color:#185FA5}
+.tc-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.tc-sub{font-size:11px;color:var(--color-text-secondary)}
+.tc-right{text-align:right}
+.tc-plate{font-size:12px;font-weight:500;color:var(--color-text-primary);letter-spacing:.5px}
+.tc-vehicle{font-size:11px;color:var(--color-text-secondary)}
+.tc-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.tc-mf label{font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:2px}
+.tc-mf span{font-size:11px;color:var(--color-text-primary);font-weight:500}
+.tl-h{display:flex;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.tl-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.tl-step:not(:last-child)::after{content:"";position:absolute;top:9px;left:50%;width:100%;height:2px;background:var(--color-border-tertiary);z-index:0}
+.tl-step.done:not(:last-child)::after{background:#639922}
+.tl-dot2{width:18px;height:18px;border-radius:50%;border:2px solid var(--color-border-secondary);background:var(--color-background-primary);z-index:1;margin-bottom:5px}
+.tl-step.done .tl-dot2{background:#639922;border-color:#639922}
+.tl-step.active .tl-dot2{background:#185FA5;border-color:#185FA5}
+.tl-step-label{font-size:9px;color:var(--color-text-secondary);text-align:center;line-height:1.3}
+.tl-step-time{font-size:10px;font-weight:500;color:var(--color-text-primary);text-align:center;margin-top:2px}
+.tl-step.active .tl-step-label{color:var(--color-text-primary)}
+.lines-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+.lines-wrap table{font-size:11px}
+.lines-wrap th{font-size:10px;padding:6px 8px}
+.lines-wrap td{padding:6px 8px}
+.pg{display:flex;gap:6px;justify-content:flex-end;align-items:center;font-size:12px;color:var(--color-text-secondary)}
+.pg-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:3px 9px;font-size:11px;cursor:pointer;color:var(--color-text-primary)}
+.pg-btn:disabled{opacity:0.4;cursor:default}
+</style>
+
+<div class="wrap">
+<h2>Reporte de pedidos — Fuerza de ventas</h2>
+<p class="sub">Última actualización: 05/05/2026 06:01 PM</p>
+
+<div class="kpis">
+  <div class="kpi"><label>Total pedidos</label><span id="kp-ord">—</span></div>
+  <div class="kpi"><label>Total clientes</label><span id="kp-cli">—</span></div>
+  <div class="kpi"><label>Monto total</label><span id="kp-mnt">—</span></div>
+  <div class="kpi"><label>Tiempo prom. total</label><span id="kp-time">—</span></div>
+</div>
+
+<div class="stages" id="stages"></div>
+
+<!-- Selector de semanas con rangos -->
+<div class="week-section">
+  <div class="week-section-head">
+    <span class="week-section-title">Filtrar por semana</span>
+    <button class="week-clear" id="wclear" style="display:none" onclick="clearWeeks()">Limpiar selección</button>
+  </div>
+  <div class="week-pills" id="week-pills"></div>
+</div>
+
+<div class="filter-row">
+  <input type="text" placeholder="Buscar pedido, factura, cliente o chofer..." id="q" oninput="pg=0;render()">
+  <select id="fest" onchange="pg=0;render()">
+    <option value="">Todos los estados</option>
+    <option>Pendiente</option><option>En tránsito</option><option>Facturado</option><option>Parcial</option><option>Cancelado</option>
+  </select>
+</div>
+
+<div id="detail" class="detail"></div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr>
+    <th style="width:82px">N° Pedido</th>
+    <th style="width:118px">Cliente</th>
+    <th style="width:80px">Factura</th>
+    <th style="width:78px">Estado</th>
+    <th style="width:108px">Chofer</th>
+    <th style="width:58px">Placa</th>
+    <th style="width:82px">Semana</th>
+    <th style="width:46px"></th>
+  </tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+<div class="pg">
+  <span id="pg-info"></span>
+  <button class="pg-btn" id="pbtn" onclick="changePg(-1)">&#8592; Ant.</button>
+  <button class="pg-btn" id="nbtn" onclick="changePg(1)">Sig. &#8594;</button>
+</div>
+</div>
+
+<script>
+const WEEKS=[
+  {code:"S15",label:"Sem. 15",range:"21–27 abr"},
+  {code:"S16",label:"Sem. 16",range:"28 abr – 4 may"},
+  {code:"S17",label:"Sem. 17",range:"28 abr – 4 may"},
+  {code:"S18",label:"Sem. 18",range:"5–11 may"},
+];
+
+const orders=[
+  {id:"PED-1042",client:"Distribuidora García",factura:"FAC-8801",estado:"Facturado",monto:4320,semana:"S18",
+   transporte:{chofer:"Carlos Mendoza",licencia:"B2-441982",tel:"555-1021",vehiculo:"Camión 3.5t",placa:"GHT-4421",empresa:"Trans Rápido SA",salida:"02/05 11:00",llegada:"02/05 14:00",kmRecorridos:48},
+   tiempos:{recibido:"02/05 08:10",preparacion:"02/05 09:30",despachado:"02/05 11:00",facturado:"02/05 14:20"},
+   durMin:[80,90,200,null],
+   lines:[{art:"Aceite girasol 1L",qped:50,qfact:50,est:"Facturado"},{art:"Arroz premium 5kg",qped:30,qfact:30,est:"Facturado"},{art:"Azúcar blanca 2kg",qped:20,qfact:15,est:"Falla"}]},
+  {id:"PED-1041",client:"Supermercado Ruiz",factura:"FAC-8799",estado:"En tránsito",monto:1870,semana:"S18",
+   transporte:{chofer:"Mario Ríos",licencia:"C-229847",tel:"555-3348",vehiculo:"Furgoneta",placa:"KLM-8812",empresa:"Flota Norte",salida:"03/05 13:40",llegada:"—",kmRecorridos:32},
+   tiempos:{recibido:"03/05 07:50",preparacion:"03/05 09:15",despachado:"03/05 13:40",facturado:null},
+   durMin:[85,265,null,null],
+   lines:[{art:"Leche entera 1L",qped:100,qfact:60,est:"Parcial facturado"},{art:"Mantequilla 250g",qped:40,qfact:0,est:"Cancelado"},{art:"Yogur natural 500g",qped:25,qfact:25,est:"Facturado"}]},
+  {id:"PED-1040",client:"Abastos López",factura:"—",estado:"Pendiente",monto:980,semana:"S18",
+   transporte:null,
+   tiempos:{recibido:"04/05 10:00",preparacion:null,despachado:null,facturado:null},
+   durMin:[null,null,null,null],
+   lines:[{art:"Jabón lavaplatos 500ml",qped:60,qfact:0,est:"Pendiente"},{art:"Detergente 1kg",qped:40,qfact:0,est:"Pendiente"}]},
+  {id:"PED-1039",client:"Mayoreo Torres",factura:"FAC-8790",estado:"Facturado",monto:6100,semana:"S17",
+   transporte:{chofer:"Luis Peña",licencia:"B1-774512",tel:"555-7765",vehiculo:"Camión 5t",placa:"RTV-2290",empresa:"Trans Rápido SA",salida:"01/05 10:05",llegada:"01/05 12:40",kmRecorridos:61},
+   tiempos:{recibido:"01/05 07:00",preparacion:"01/05 08:20",despachado:"01/05 10:05",facturado:"01/05 12:50"},
+   durMin:[80,105,165,null],
+   lines:[{art:"Papel higiénico x12",qped:80,qfact:80,est:"Facturado"},{art:"Servilletas x100",qped:50,qfact:50,est:"Facturado"},{art:"Toallas cocina x2",qped:35,qfact:35,est:"Facturado"},{art:"Bolsas plásticas x50",qped:20,qfact:10,est:"Falla"}]},
+  {id:"PED-1038",client:"Tienda Méndez",factura:"FAC-8785",estado:"Cancelado",monto:430,semana:"S17",
+   transporte:null,
+   tiempos:{recibido:"30/04 09:00",preparacion:"30/04 10:10",despachado:null,facturado:null},
+   durMin:[70,null,null,null],
+   lines:[{art:"Café molido 250g",qped:15,qfact:0,est:"Cancelado"},{art:"Té verde x20 sobres",qped:10,qfact:0,est:"Cancelado"}]},
+  {id:"PED-1037",client:"La Economía SA",factura:"FAC-8780",estado:"Facturado",monto:2750,semana:"S16",
+   transporte:{chofer:"Pedro Salinas",licencia:"B2-330128",tel:"555-4490",vehiculo:"Camión 3.5t",placa:"MNP-5567",empresa:"Flota Norte",salida:"29/04 11:20",llegada:"29/04 13:45",kmRecorridos:55},
+   tiempos:{recibido:"29/04 08:30",preparacion:"29/04 09:40",despachado:"29/04 11:20",facturado:"29/04 13:55"},
+   durMin:[70,100,155,null],
+   lines:[{art:"Harina de trigo 1kg",qped:100,qfact:100,est:"Facturado"},{art:"Sal refinada 1kg",qped:80,qfact:80,est:"Facturado"}]},
+  {id:"PED-1036",client:"Distribuidora Norte",factura:"FAC-8770",estado:"Facturado",monto:3100,semana:"S16",
+   transporte:{chofer:"Carlos Mendoza",licencia:"B2-441982",tel:"555-1021",vehiculo:"Camión 3.5t",placa:"GHT-4421",empresa:"Trans Rápido SA",salida:"28/04 10:00",llegada:"28/04 12:30",kmRecorridos:44},
+   tiempos:{recibido:"28/04 07:30",preparacion:"28/04 08:45",despachado:"28/04 10:00",facturado:"28/04 12:40"},
+   durMin:[75,75,160,null],
+   lines:[{art:"Aceite vegetal 2L",qped:40,qfact:40,est:"Facturado"},{art:"Pasta corta 500g",qped:60,qfact:60,est:"Facturado"}]},
+  {id:"PED-1035",client:"Mayorista Sur",factura:"—",estado:"Pendiente",monto:1540,semana:"S15",
+   transporte:null,
+   tiempos:{recibido:"21/04 09:00",preparacion:null,despachado:null,facturado:null},
+   durMin:[null,null,null,null],
+   lines:[{art:"Galletas x12",qped:30,qfact:0,est:"Pendiente"},{art:"Jugo x6",qped:20,qfact:0,est:"Pendiente"}]},
+];
+
+const PER=5; let pg=0;
+let selectedWeeks=new Set();
+const fmtMin=m=>m==null?"—":m<60?m+"min":Math.floor(m/60)+"h "+(m%60>0?m%60+"min":"");
+const totalMin=o=>o.durMin.filter(x=>x!=null).reduce((a,b)=>a+b,0);
+const bc=s=>({Facturado:"b-fact","En tránsito":"b-trans",Parcial:"b-pfact",Pendiente:"b-pend",Cancelado:"b-can"}[s]||"b-pend");
+const bl=s=>({Facturado:"b-fact","Parcial facturado":"b-pfact",Pendiente:"b-pend",Cancelado:"b-can",Falla:"b-fail"}[s]||"b-pend");
+const initials=n=>n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const weekRange=code=>{const w=WEEKS.find(x=>x.code===code);return w?w.range:code;};
+
+function countByWeek(code){return orders.filter(o=>o.semana===code).length;}
+
+function buildWeekPills(){
+  const c=document.getElementById("week-pills");
+  c.innerHTML="";
+  // Pill "Todas"
+  const all=document.createElement("div");
+  all.className="wpill-all"+(selectedWeeks.size===0?" active":"");
+  all.innerHTML=`<div style="font-size:12px;font-weight:500">Todas las semanas</div><div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px">${orders.length} pedidos</div>`;
+  all.onclick=()=>{selectedWeeks.clear();pg=0;buildWeekPills();render();};
+  c.appendChild(all);
+
+  WEEKS.forEach(w=>{
+    const cnt=countByWeek(w.code);
+    const pill=document.createElement("div");
+    pill.className="wpill"+(selectedWeeks.has(w.code)?" active":"");
+    pill.innerHTML=`<div class="wpill-code">${w.label}</div><div class="wpill-range">${w.range}</div><div class="wpill-count">${cnt} pedido${cnt!==1?"s":""}</div>`;
+    pill.onclick=()=>{
+      if(selectedWeeks.has(w.code)) selectedWeeks.delete(w.code);
+      else selectedWeeks.add(w.code);
+      pg=0;buildWeekPills();render();
+    };
+    c.appendChild(pill);
+  });
+  document.getElementById("wclear").style.display=selectedWeeks.size>0?"inline":"none";
+}
+
+function clearWeeks(){selectedWeeks.clear();pg=0;buildWeekPills();render();}
+
+function filtered(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const fe=document.getElementById("fest").value;
+  return orders.filter(o=>
+    (selectedWeeks.size===0||selectedWeeks.has(o.semana))&&
+    (!q||o.id.toLowerCase().includes(q)||o.factura.toLowerCase().includes(q)||
+     o.client.toLowerCase().includes(q)||(o.transporte&&o.transporte.chofer.toLowerCase().includes(q)))&&
+    (!fe||o.estado===fe)
+  );
+}
+
+function renderStages(data){
+  const keys=["recibido","preparacion","despachado","facturado"];
+  const labels=["Recibido","En preparación","Despachado","Facturado"];
+  const colors=["#378ADD","#EF9F27","#9FE1CB","#639922"];
+  const counts=[0,0,0,0],sums=[0,0,0,0],ns=[0,0,0,0];
+  data.forEach(o=>{
+    keys.forEach((k,i)=>{if(o.tiempos[k])counts[i]++;});
+    o.durMin.forEach((d,i)=>{if(d!=null){sums[i]+=d;ns[i]++;}});
+  });
+  document.getElementById("stages").innerHTML=labels.map((l,i)=>`
+    <div class="stage">
+      <div class="stage-label">${l}</div>
+      <div class="stage-count">${counts[i]}</div>
+      <div class="stage-time">Prom: ${ns[i]>0?fmtMin(Math.round(sums[i]/ns[i])):"—"}</div>
+      <div class="stage-bar" style="background:${colors[i]}"></div>
+    </div>`).join("");
+}
+
+function render(){
+  const data=filtered();
+  const slice=data.slice(pg*PER,pg*PER+PER);
+  document.getElementById("tbody").innerHTML=slice.map(o=>{
+    const wk=WEEKS.find(x=>x.code===o.semana);
+    return`<tr>
+      <td style="font-weight:500">${o.id}</td>
+      <td>${o.client}</td>
+      <td style="font-weight:500">${o.factura}</td>
+      <td><span class="badge ${bc(o.estado)}">${o.estado}</span></td>
+      <td>${o.transporte?o.transporte.chofer:'<span style="color:var(--color-text-secondary)">Sin asignar</span>'}</td>
+      <td style="font-weight:500;letter-spacing:.4px">${o.transporte?o.transporte.placa:"—"}</td>
+      <td><span style="font-size:11px;font-weight:500">${wk?wk.label:o.semana}</span><br><span style="font-size:10px;color:var(--color-text-secondary)">${wk?wk.range:""}</span></td>
+      <td><button class="btn-det" onclick="showDet('${o.id}')">Ver</button></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="8" style="text-align:center;color:var(--color-text-secondary);padding:1.5rem">Sin resultados</td></tr>`;
+
+  const clients=new Set(data.map(o=>o.client)).size;
+  const monto=data.reduce((a,o)=>a+o.monto,0);
+  const tiempos=data.map(o=>totalMin(o)).filter(x=>x>0);
+  const prom=tiempos.length?Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length):0;
+  document.getElementById("kp-ord").textContent=data.length;
+  document.getElementById("kp-cli").textContent=clients;
+  document.getElementById("kp-mnt").textContent="$"+monto.toLocaleString("es");
+  document.getElementById("kp-time").textContent=prom?fmtMin(prom):"—";
+  renderStages(data);
+  document.getElementById("pg-info").textContent=data.length?`${pg*PER+1}–${Math.min(pg*PER+PER,data.length)} de ${data.length}`:"0";
+  document.getElementById("pbtn").disabled=pg===0;
+  document.getElementById("nbtn").disabled=(pg+1)*PER>=data.length;
+}
+
+function changePg(d){pg=Math.max(0,pg+d);render();}
+
+function showDet(id){
+  const o=orders.find(x=>x.id===id);
+  const wk=WEEKS.find(x=>x.code===o.semana);
+  const el=document.getElementById("detail");
+  const keys=["recibido","preparacion","despachado","facturado"];
+  const labels=["Pedido recibido","En preparación","Despachado","Facturado"];
+  const activeIdx=keys.map(k=>o.tiempos[k]!=null).lastIndexOf(true);
+  const tlSteps=labels.map((l,i)=>{
+    const cls=i<activeIdx?"done":i===activeIdx?"active":"";
+    const hora=o.tiempos[keys[i]]||"Pendiente";
+    const dur=o.durMin[i]!=null?`<div class="tl-step-time">${fmtMin(o.durMin[i])}</div>`:"";
+    return`<div class="tl-step ${cls}"><div class="tl-dot2"></div><div class="tl-step-label">${l}<br><span style="font-size:9px">${hora}</span></div>${dur}</div>`;
+  }).join("");
+  const tblock=o.transporte?`
+    <div class="transport-card">
+      <div class="avatar">${initials(o.transporte.chofer)}</div>
+      <div><div class="tc-name">${o.transporte.chofer}</div><div class="tc-sub">Lic. ${o.transporte.licencia} &nbsp;·&nbsp; ${o.transporte.tel}</div><div class="tc-sub">${o.transporte.empresa}</div></div>
+      <div class="tc-right"><div class="tc-plate">${o.transporte.placa}</div><div class="tc-vehicle">${o.transporte.vehiculo}</div></div>
+    </div>
+    <div class="tc-meta">
+      <div class="tc-mf"><label>Hora salida</label><span>${o.transporte.salida}</span></div>
+      <div class="tc-mf"><label>Hora llegada</label><span>${o.transporte.llegada}</span></div>
+      <div class="tc-mf"><label>Km recorridos</label><span>${o.transporte.kmRecorridos} km</span></div>
+    </div>`:`<div style="font-size:12px;color:var(--color-text-secondary);padding:.5rem 0">Sin transporte asignado.</div>`;
+  const lineRows=o.lines.map(l=>`<tr><td>${l.art}</td><td style="text-align:center">${l.qped}</td><td style="text-align:center">${l.qfact}</td><td style="text-align:center">${l.qped-l.qfact}</td><td><span class="badge ${bl(l.est)}">${l.est}</span></td></tr>`).join("");
+  el.innerHTML=`
+    <div class="det-head">
+      <div>
+        <div class="det-title">${o.id} &mdash; ${o.client}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">${wk?wk.label:o.semana} &nbsp;·&nbsp; ${wk?wk.range:""}</div>
+      </div>
+      <button class="det-close" onclick="document.getElementById('detail').className='detail'">&#x2715;</button>
+    </div>
+    <div class="det-meta">
+      <div class="meta-f"><label>N° Factura</label><span style="font-weight:500">${o.factura}</span></div>
+      <div class="meta-f"><label>Estado documento</label><span class="badge ${bc(o.estado)}">${o.estado}</span></div>
+      <div class="meta-f"><label>Monto total</label><span style="font-weight:500">$${o.monto.toLocaleString("es")}</span></div>
+    </div>
+    <p class="sec-title">Tiempo por etapa</p>
+    <div class="tl-h">${tlSteps}</div>
+    <p class="sec-title">Transporte y chofer</p>
+    ${tblock}
+    <p class="sec-title">Líneas del pedido</p>
+    <div class="lines-wrap"><table>
+      <thead><tr>
+        <th style="width:36%">Artículo</th>
+        <th style="width:14%;text-align:center">Cant. pedida</th>
+        <th style="width:16%;text-align:center">Cant. facturada</th>
+        <th style="width:14%;text-align:center">Diferencia</th>
+        <th style="width:20%">Estado renglón</th>
+      </tr></thead>
+      <tbody>${lineRows}</tbody>
+    </table></div>`;
+  el.className="detail open";
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+buildWeekPills();
+render();
+</script>
