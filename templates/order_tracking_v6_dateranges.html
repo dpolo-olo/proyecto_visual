@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Pedidos — Fuerza de Ventas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --color-text-primary: #0F172A;
+      --color-text-secondary: #64748B;
+      --color-background-primary: #FFFFFF;
+      --color-background-secondary: #F8FAFC;
+      --color-border-primary: #CBD5E1;
+      --color-border-secondary: #E2E8F0;
+      --color-border-tertiary: #F1F5F9;
+      --border-radius-md: 10px;
+      --border-radius-lg: 14px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.07), 0 2px 6px rgba(0,0,0,.04);
+      --accent: #2563EB;
+      --accent-light: #EFF6FF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      background: #F1F5F9;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+    }
+
+    /* ── Header de página ── */
+    .page-header {
+      background: #fff;
+      border-bottom: 1px solid var(--color-border-secondary);
+      padding: .85rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .page-header-icon {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-header-icon svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .page-header-text { line-height: 1.2; }
+    .page-header-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+    .page-header-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+
+    /* ── Contenedor central — responsive ── */
+    .page-body { max-width: 1300px; margin: 0 auto; padding: 1.75rem 2rem; }
+    @media (max-width: 900px)  { .page-body { padding: 1rem; } }
+    @media (max-width: 600px)  { .page-body { padding: .75rem .5rem; } }
+
+    /* ── Card base ── */
+    .card {
+      background: #fff;
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border-secondary);
+    }
+
+    /* ── Inputs y selects estilizados ── */
+    input[type="text"], select {
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: .5rem .8rem;
+      font-size: 12.5px;
+      font-family: var(--font-sans);
+      color: var(--color-text-primary);
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      height: 36px;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    input[type="text"]::placeholder { color: #94A3B8; }
+    select { appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right .7rem center; padding-right: 2rem; }
+  </style>
+
+  <!-- ── Estilos originales del componente (sin modificaciones) ── -->
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.25rem 0;max-width:680px;font-family:var(--font-sans)}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.kpi label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+.kpi span{font-size:19px;font-weight:500;color:var(--color-text-primary)}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.stage{padding:.85rem .75rem;border-right:0.5px solid var(--color-border-tertiary);text-align:center}
+.stage:last-child{border-right:none}
+.stage-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.stage-count{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.stage-time{font-size:11px;color:var(--color-text-secondary)}
+.stage-bar{height:3px;border-radius:2px;margin-top:8px}
+
+/* Week pills */
+.week-section{margin-bottom:1.25rem}
+.week-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.week-section-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.4px}
+.week-clear{font-size:11px;color:var(--color-text-secondary);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
+.week-pills{display:flex;gap:6px;flex-wrap:wrap}
+.wpill{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);cursor:pointer;user-select:none;padding:6px 10px;transition:all .12s;min-width:130px}
+.wpill:hover{border-color:var(--color-border-primary)}
+.wpill.active{background:#185FA5;border-color:#185FA5}
+.wpill-code{font-size:11px;font-weight:600;color:var(--color-text-secondary);margin-bottom:1px}
+.wpill.active .wpill-code{color:rgba(255,255,255,.75)}
+.wpill-range{font-size:12px;color:var(--color-text-primary);line-height:1.3}
+.wpill.active .wpill-range{color:#fff}
+.wpill-count{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+.wpill.active .wpill-count{color:rgba(255,255,255,.65)}
+.wpill-all{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);cursor:pointer;padding:6px 12px;font-size:12px;color:var(--color-text-secondary);font-weight:500}
+.wpill-all.active{background:var(--color-background-secondary);border-color:var(--color-border-primary);color:var(--color-text-primary)}
+
+.filter-row{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.filter-row input{flex:1;min-width:150px}
+.filter-row select{width:155px}
+.table-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.25rem}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{background:var(--color-background-secondary);padding:8px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500}
+.b-pend{background:#FAEEDA;color:#854F0B}
+.b-pfact{background:#E6F1FB;color:#185FA5}
+.b-can{background:#FCEBEB;color:#A32D2D}
+.b-fail{background:#FAEEDA;color:#993C1D}
+.b-fact{background:#EAF3DE;color:#3B6D11}
+.b-trans{background:#E1F5EE;color:#0F6E56}
+.b-apart{background:#F3E8FF;color:#6B21A8}
+.b-back{background:#FEE2E2;color:#991B1B}
+  .b-boparcial{background:#FFEDD5;color:#9A3412}
+.b-ret{background:#FFF7CD;color:#854F0B}
+.btn-det{font-size:11px;color:var(--color-text-secondary);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
+.detail{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.1rem;margin-bottom:1.25rem;display:none}
+.detail.open{display:block}
+.det-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem}
+.det-title{font-size:14px;font-weight:500}
+.det-close{background:none;border:none;font-size:17px;cursor:pointer;color:var(--color-text-secondary)}
+.det-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.meta-f label{font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:2px}
+.meta-f span{font-size:12px;color:var(--color-text-primary)}
+.sec-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;margin-top:12px}
+.sec-title:first-of-type{margin-top:0}
+.transport-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.9rem 1rem;margin-bottom:.5rem;display:grid;grid-template-columns:44px 1fr 1fr;gap:12px;align-items:center}
+.avatar{width:40px;height:40px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;color:#185FA5}
+.tc-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.tc-sub{font-size:11px;color:var(--color-text-secondary)}
+.tc-right{text-align:right}
+.tc-plate{font-size:12px;font-weight:500;color:var(--color-text-primary);letter-spacing:.5px}
+.tc-vehicle{font-size:11px;color:var(--color-text-secondary)}
+.tc-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.tc-mf label{font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:2px}
+.tc-mf span{font-size:11px;color:var(--color-text-primary);font-weight:500}
+.tl-h{display:flex;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+.tl-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.tl-step:not(:last-child)::after{content:"";position:absolute;top:9px;left:50%;width:100%;height:2px;background:var(--color-border-tertiary);z-index:0}
+.tl-step.done:not(:last-child)::after{background:#639922}
+.tl-dot2{width:18px;height:18px;border-radius:50%;border:2px solid var(--color-border-secondary);background:var(--color-background-primary);z-index:1;margin-bottom:5px}
+.tl-step.done .tl-dot2{background:#639922;border-color:#639922}
+.tl-step.active .tl-dot2{background:#185FA5;border-color:#185FA5}
+.tl-step-label{font-size:9px;color:var(--color-text-secondary);text-align:center;line-height:1.3}
+.tl-step-time{font-size:10px;font-weight:500;color:var(--color-text-primary);text-align:center;margin-top:2px}
+.tl-step.active .tl-step-label{color:var(--color-text-primary)}
+.lines-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+.lines-wrap table{font-size:11px}
+.lines-wrap th{font-size:10px;padding:6px 8px}
+.lines-wrap td{padding:6px 8px}
+.pg{display:flex;gap:6px;justify-content:flex-end;align-items:center;font-size:12px;color:var(--color-text-secondary)}
+.pg-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:3px 9px;font-size:11px;cursor:pointer;color:var(--color-text-primary)}
+.pg-btn:disabled{opacity:0.4;cursor:default}
+  </style>
+</head>
+<body>
+
+<!-- ── Header de página ── -->
+<header class="page-header">
+  <img id="header-logo" src="/logos/Mayoreo.png" alt="Logo" class="header-logo">
+  <div class="page-header-text">
+    <div class="page-header-title">Reporte de Pedidos</div>
+    <div class="page-header-sub" id="last-update">Cargando datos...</div>
+  </div>
+  <div class="emp-btns" id="emp-btns">
+    <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Mayoreo.png" alt="Todas">
+      <span>Todas</span>
+    </button>
+    <button class="emp-btn" data-emp="BEVAL" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Beval.png" alt="Beval">
+    </button>
+    <button class="emp-btn" data-emp="FEBECA" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Febeca.png" alt="Febeca">
+    </button>
+    <button class="emp-btn" data-emp="SILLACA" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Sillaca.png" alt="Sillaca">
+    </button>
+  </div>
+</header>
+
+<!-- ── Cuerpo de página ── -->
+<div class="page-body">
+<div class="wrap">
+<h2 style="display:none"></h2>
+<p class="sub" style="display:none"></p>
+
+<div class="pipeline-wrap">
+  <div class="pipeline-hdr">
+    <span class="pipeline-title">Pipeline de pedidos</span>
+    <span class="pipeline-total" id="kp-ord">—</span>
+  </div>
+  <div class="pipeline-stages" id="stages"></div>
+</div>
+<!-- KPI spans ocultos para compatibilidad con render() original -->
+<span id="kp-cli" style="display:none"></span>
+<span id="kp-mnt" style="display:none"></span>
+<span id="kp-time" style="display:none"></span>
+
+<!-- Selector de semanas con rangos -->
+<div class="week-section">
+  <div class="week-section-head">
+    <span class="week-section-title">Filtrar por período</span>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <select id="fyear" onchange="onYearChange()" style="width:auto;min-width:80px"></select>
+      <select id="fmonth" onchange="onMonthChange()" style="width:auto;min-width:130px"></select>
+      <button class="week-clear" id="wclear" style="display:none" onclick="clearWeeks()">Limpiar semanas</button>
+    </div>
+  </div>
+  <div class="week-pills" id="week-pills"></div>
+</div>
+
+<div class="filter-row">
+  <input type="text" placeholder="Buscar pedido, factura o cliente..." id="q" oninput="pg=0;render()">
+  <select id="fest" onchange="pg=0;render()">
+    <option value="">Todos los estados</option>
+  </select>
+</div>
+
+<div id="detail" class="detail"></div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr>
+    <th style="width:185px">N° Pedido</th>
+    <th style="width:175px">Cliente</th>
+    <th style="width:150px">N° Factura</th>
+    <th style="width:88px">Estado</th>
+    <th style="width:100px">Chofer</th>
+    <th style="width:50px">Placa</th>
+    <th style="width:100px">Fecha Pedido</th>
+    <th style="width:45px"></th>
+  </tr></thead>
+  <tbody id="tbody">
+    <tr><td colspan="8" style="text-align:center;color:var(--color-text-secondary);padding:1.5rem">Cargando datos...</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="pg">
+  <span id="pg-info"></span>
+  <button class="pg-btn" id="pbtn" onclick="changePg(-1)">&#8592; Ant.</button>
+  <button class="pg-btn" id="nbtn" onclick="changePg(1)">Sig. &#8594;</button>
+</div>
+</div>
+
+<!-- ── Script original (datos estáticos reemplazados por array vacío) ── -->
+<script>
+/* Semanas dinámicas — se pueblan desde los datos reales */
+let WEEKS = [];
+
+/* ── Array vacío: los datos reales llegan vía fetch ── */
+let orders=[];
+
+const PER=5; let pg=0;
+let selectedWeeks=new Set();
+const fmtMin=m=>m==null?"—":m<60?m+"min":Math.floor(m/60)+"h "+(m%60>0?m%60+"min":"");
+const totalMin=o=>o.durMin.filter(x=>x!=null).reduce((a,b)=>a+b,0);
+const bc=s=>({Facturado:"b-fact",Autorizado:"b-trans",Backorder:"b-back",Retenido:"b-ret",Pendiente:"b-pend",Cancelado:"b-can"}[s]||"b-pend");
+const BL_MAP={
+  'FACTURADO':   'b-fact',
+  'PREFACTURADO':'b-pfact',
+  'DESPACHADO':  'b-trans',
+  'TRÁNSITO':    'b-trans',
+  'TRANSITO':    'b-trans',
+  'APARTADO':    'b-apart',
+  'BACKORDER':   'b-back',
+  'BO PARCIAL':  'b-boparcial',
+  'RETENIDO':    'b-ret',
+  'CANCELADO':   'b-can',
+  'ND':          'b-pend',
+};
+const bl=s=>BL_MAP[(s||'').toUpperCase().trim()]||'b-pend';
+const initials=n=>n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const weekRange=code=>{const w=WEEKS.find(x=>x.code===code);return w?w.range:code;};
+
+function countByWeek(code){return orders.filter(o=>o.semana===code).length;}
+
+function buildWeekPills(){
+  const c=document.getElementById("week-pills");
+  c.innerHTML="";
+  const all=document.createElement("div");
+  all.className="wpill-all"+(selectedWeeks.size===0?" active":"");
+  all.innerHTML=`<div style="font-size:12px;font-weight:500">Todas las semanas</div><div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px">${orders.length} pedidos</div>`;
+  all.onclick=()=>{selectedWeeks.clear();pg=0;buildWeekPills();render();};
+  c.appendChild(all);
+
+  WEEKS.forEach(w=>{
+    const cnt=countByWeek(w.code);
+    const pill=document.createElement("div");
+    pill.className="wpill"+(selectedWeeks.has(w.code)?" active":"");
+    pill.innerHTML=`<div class="wpill-code">${w.label}</div><div class="wpill-range">${w.range}</div><div class="wpill-count">${cnt} pedido${cnt!==1?"s":""}</div>`;
+    pill.onclick=()=>{
+      if(selectedWeeks.has(w.code)) selectedWeeks.delete(w.code);
+      else selectedWeeks.add(w.code);
+      pg=0;buildWeekPills();render();
+    };
+    c.appendChild(pill);
+  });
+  document.getElementById("wclear").style.display=selectedWeeks.size>0?"inline":"none";
+}
+
+function clearWeeks(){selectedWeeks.clear();pg=0;buildWeekPills();render();}
+
+function filtered(){
+  const q=document.getElementById("q").value.toLowerCase();
+  const fe=document.getElementById("fest").value;
+  return orders.filter(o=>
+    (selectedWeeks.size===0||selectedWeeks.has(o.semana))&&
+    (!q||o.id.toLowerCase().includes(q)||o.factura.toLowerCase().includes(q)||
+     o.client.toLowerCase().includes(q)||(o.transporte&&o.transporte.chofer.toLowerCase().includes(q)))&&
+    (!fe||o.estado===fe)
+  );
+}
+
+function renderStages(data){
+  const keys=["recibido","preparacion","despachado","facturado"];
+  const labels=["Recibido","En preparación","Despachado","Facturado"];
+  const colors=["#378ADD","#EF9F27","#9FE1CB","#639922"];
+  const counts=[0,0,0,0],sums=[0,0,0,0],ns=[0,0,0,0];
+  data.forEach(o=>{
+    keys.forEach((k,i)=>{if(o.tiempos[k])counts[i]++;});
+    o.durMin.forEach((d,i)=>{if(d!=null){sums[i]+=d;ns[i]++;}});
+  });
+  document.getElementById("stages").innerHTML=labels.map((l,i)=>`
+    <div class="stage">
+      <div class="stage-label">${l}</div>
+      <div class="stage-count">${counts[i]}</div>
+      <div class="stage-time">Prom: ${ns[i]>0?fmtMin(Math.round(sums[i]/ns[i])):"—"}</div>
+      <div class="stage-bar" style="background:${colors[i]}"></div>
+    </div>`).join("");
+}
+
+function render(){
+  const data=filtered();
+  const slice=data.slice(pg*PER,pg*PER+PER);
+  document.getElementById("tbody").innerHTML=slice.map(o=>{
+    const wk=WEEKS.find(x=>x.code===o.semana);
+    return`<tr>
+      <td><span class="id-copy" onclick="copyId(this,'${o.id.replace(/'/g,"\\'")}')" title="Clic para copiar">${o.id||'—'}</span></td>
+      <td>${o.client}</td>
+      <td>${o.factura?`<span class="id-copy" onclick="copyId(this,'${o.factura.replace(/'/g,"\\'")}')  " title="Clic para copiar">${o.factura}</span>`:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
+      <td><span class="badge ${bc(o.estado)}">${o.estado}</span></td>
+      <td>${o.transporte?o.transporte.chofer:'<span style="color:var(--color-text-secondary)">Sin asignar</span>'}</td>
+      <td style="font-weight:500;letter-spacing:.4px">${o.transporte?o.transporte.placa:"—"}</td>
+      <td style="font-size:11px;font-weight:500">${o._fecha?(String(o._fecha.getDate()).padStart(2,'0')+'/'+(String(o._fecha.getMonth()+1).padStart(2,'0'))+'/'+o._fecha.getFullYear()):'—'}</td>
+      <td><button class="btn-det" onclick="showDet('${o.id.replace(/'/g,"\\'")}')">Ver</button></td>
+    </tr>`;
+  }).join("")||`<tr><td colspan="8" style="text-align:center;color:var(--color-text-secondary);padding:1.5rem">Sin resultados</td></tr>`;
+
+  const clients=new Set(data.map(o=>o.client)).size;
+  const monto=data.reduce((a,o)=>a+o.monto,0);
+  const tiempos=data.map(o=>totalMin(o)).filter(x=>x>0);
+  const prom=tiempos.length?Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length):0;
+  document.getElementById("kp-ord").textContent=data.length;
+  document.getElementById("kp-cli").textContent=clients;
+  document.getElementById("kp-mnt").textContent="$"+monto.toLocaleString("es");
+  document.getElementById("kp-time").textContent=prom?fmtMin(prom):"—";
+  renderStages(data);
+  document.getElementById("pg-info").textContent=data.length?`${pg*PER+1}–${Math.min(pg*PER+PER,data.length)} de ${data.length}`:"0";
+  document.getElementById("pbtn").disabled=pg===0;
+  document.getElementById("nbtn").disabled=(pg+1)*PER>=data.length;
+}
+
+function changePg(d){pg=Math.max(0,pg+d);render();}
+
+function showDet(id){
+  const o=orders.find(x=>x.id===id);
+  if(!o)return;
+  const wk=WEEKS.find(x=>x.code===o.semana);
+  const el=document.getElementById("detail");
+  const keys=["recibido","preparacion","despachado","facturado"];
+  const labels=["Pedido recibido","En preparación","Despachado","Facturado"];
+  const activeIdx=keys.map(k=>o.tiempos[k]!=null).lastIndexOf(true);
+  const tlSteps=labels.map((l,i)=>{
+    const cls=i<activeIdx?"done":i===activeIdx?"active":"";
+    const hora=o.tiempos[keys[i]]||"Pendiente";
+    const dur=o.durMin[i]!=null?`<div class="tl-step-time">${fmtMin(o.durMin[i])}</div>`:"";
+    return`<div class="tl-step ${cls}"><div class="tl-dot2"></div><div class="tl-step-label">${l}<br><span style="font-size:9px">${hora}</span></div>${dur}</div>`;
+  }).join("");
+  const tblock=o.transporte?`
+    <div class="transport-card">
+      <div class="avatar">${initials(o.transporte.chofer)}</div>
+      <div><div class="tc-name">${o.transporte.chofer}</div><div class="tc-sub">Lic. ${o.transporte.licencia} &nbsp;·&nbsp; ${o.transporte.tel}</div><div class="tc-sub">${o.transporte.empresa}</div></div>
+      <div class="tc-right"><div class="tc-plate">${o.transporte.placa}</div><div class="tc-vehicle">${o.transporte.vehiculo}</div></div>
+    </div>
+    <div class="tc-meta">
+      <div class="tc-mf"><label>Hora salida</label><span>${o.transporte.salida}</span></div>
+      <div class="tc-mf"><label>Hora llegada</label><span>${o.transporte.llegada}</span></div>
+      <div class="tc-mf"><label>Km recorridos</label><span>${o.transporte.kmRecorridos} km</span></div>
+    </div>`:`<div style="font-size:12px;color:var(--color-text-secondary);padding:.5rem 0">Sin transporte asignado.</div>`;
+  const lineRows=o.lines.map(l=>`<tr><td>${l.art}</td><td style="text-align:center">${l.qped}</td><td style="text-align:center">${l.qfact}</td><td style="text-align:center">${l.qped-l.qfact}</td><td><span class="badge ${bl(l.est)}">${l.est}</span></td></tr>`).join(
+    "")||`<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin detalle de líneas disponible en esta versión.</td></tr>`;
+  el.innerHTML=`
+    <div class="det-head">
+      <div>
+        <div class="det-title">${o.id} &mdash; ${o.client}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">${wk?wk.label:o.semana||"Sin semana"} &nbsp;·&nbsp; ${wk?wk.range:""}</div>
+      </div>
+      <button class="det-close" onclick="document.getElementById('detail').className='detail'">&#x2715;</button>
+    </div>
+    <div class="det-meta">
+      <div class="meta-f"><label>N° Factura</label><span style="font-weight:500">${o.factura}</span></div>
+      <div class="meta-f"><label>Estado documento</label><span class="badge ${bc(o.estado)}">${o.estado}</span></div>
+      <div class="meta-f"><label>Monto total</label><span style="font-weight:500">$${o.monto.toLocaleString("es")}</span></div>
+    </div>
+    <p class="sec-title">Tiempo por etapa</p>
+    <div class="tl-h">${tlSteps}</div>
+    <p class="sec-title">Transporte y chofer</p>
+    ${tblock}
+    <p class="sec-title">Líneas del pedido</p>
+    <div class="lines-wrap"><table>
+      <thead><tr>
+        <th style="width:36%">Artículo</th>
+        <th style="width:14%;text-align:center">Cant. pedida</th>
+        <th style="width:16%;text-align:center">Cant. facturada</th>
+        <th style="width:14%;text-align:center">Diferencia</th>
+        <th style="width:20%">Estado renglón</th>
+      </tr></thead>
+      <tbody>${lineRows}</tbody>
+    </table></div>`;
+  el.className="detail open";
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+buildWeekPills();
+render();
+</script>
+
+<!-- ── Overrides visuales ── -->
+<style>
+  /* Wrap sin max-width propio — lo maneja .page-body */
+  .wrap { max-width: 100%; padding: 0; }
+
+  /* KPI — solo 1 visible, ajustar grid */
+  .kpis { grid-template-columns: minmax(160px, 220px); gap: 12px; }
+
+  /* KPI cards con sombra y borde suave */
+  .kpi {
+    background: #fff;
+    border: 1px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .15s;
+  }
+  .kpi:hover { box-shadow: var(--shadow-md); }
+  .kpi label { font-size: 11px; font-weight: 500; letter-spacing: .2px; text-transform: uppercase; }
+  .kpi span { font-size: 22px; font-weight: 600; }
+
+  /* Etapas con card */
+  .stages {
+    background: #fff;
+    border: 1px solid var(--color-border-secondary) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-sm);
+  }
+  .stage { border-right: 1px solid var(--color-border-secondary) !important; }
+  .stage-bar { height: 4px; margin-top: 10px; border-radius: 4px; }
+
+  /* Week pills — rediseño chip horizontal */
+  .week-section {
+    background: #fff;
+    border: 1px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: .85rem 1rem .75rem;
+  }
+  .week-section-head { margin-bottom: .7rem; }
+  .week-section-title { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: var(--color-text-secondary); }
+  .week-pills {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-secondary) transparent;
+  }
+  .week-pills::-webkit-scrollbar { height: 3px; }
+  .week-pills::-webkit-scrollbar-thumb { background: var(--color-border-secondary); border-radius: 99px; }
+
+  .wpill-all, .wpill {
+    flex-shrink: 0;
+    border-radius: 999px !important;
+    border: 1.5px solid var(--color-border-secondary) !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: border-color .13s, background .13s, color .13s !important;
+    padding: 5px 13px !important;
+    min-width: auto !important;
+    text-align: center;
+  }
+  .wpill-all:hover, .wpill:hover { border-color: var(--accent) !important; }
+  .wpill-all.active {
+    background: var(--accent-light) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+  }
+  .wpill.active {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+  }
+  .wpill-code { font-size: 10px !important; font-weight: 700 !important; color: var(--color-text-secondary) !important; margin-bottom: 0 !important; }
+  .wpill.active .wpill-code { color: rgba(255,255,255,.75) !important; }
+  .wpill-range { font-size: 12px !important; font-weight: 600 !important; color: var(--color-text-primary) !important; line-height: 1.2 !important; }
+  .wpill.active .wpill-range { color: #fff !important; }
+  .wpill-count { font-size: 10px !important; color: var(--color-text-secondary) !important; margin-top: 1px !important; }
+  .wpill.active .wpill-count { color: rgba(255,255,255,.65) !important; }
+
+  /* Tabla con card */
+  .table-wrap {
+    border: 1px solid var(--color-border-secondary) !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  th { font-size: 11px; letter-spacing: .3px; text-transform: uppercase; background: var(--color-background-secondary) !important; }
+  tr:hover td { background: var(--accent-light) !important; }
+
+  /* Badges más redondos y con mejor contraste */
+  .badge { font-size: 10.5px; font-weight: 600; letter-spacing: .1px; padding: 3px 9px; }
+  .b-fact  { background: #DCFCE7; color: #166534; }
+  .b-trans { background: #CCFBF1; color: #0F766E; }
+  .b-pfact { background: #DBEAFE; color: #1D4ED8; }
+  .b-pend  { background: #FEF3C7; color: #92400E; }
+  .b-can   { background: #FEE2E2; color: #991B1B; }
+  .b-fail  { background: #FFEDD5; color: #9A3412; }
+
+  /* Panel de detalle */
+  .detail { border: 1px solid var(--color-border-secondary) !important; box-shadow: var(--shadow-md); }
+
+  /* Paginación */
+  .pg-btn {
+    border: 1px solid var(--color-border-secondary) !important;
+    border-radius: var(--border-radius-md) !important;
+    padding: 5px 13px !important;
+    font-size: 12px !important;
+    font-weight: 500;
+    transition: background .12s, border-color .12s;
+  }
+  .pg-btn:not(:disabled):hover { background: var(--accent-light); border-color: var(--accent) !important; color: var(--accent); }
+
+  /* Filtros */
+  .filter-row { gap: 10px; }
+
+  /* Tabla con ancho mínimo — el wrapper maneja el scroll horizontal */
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 893px; width: 100%; }
+
+  /* Columna factura — no truncar */
+  td:nth-child(3) { overflow: visible; white-space: nowrap; }
+
+  /* Truncar texto largo en celdas */
+  td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Monto total con formato destacado en KPI */
+  #kp-mnt { font-size: 17px !important; }
+
+  /* N° Pedido — copiable, sin truncar */
+  table { min-width: 699px; }
+  .id-copy {
+    font-weight: 500;
+    font-size: 11px;
+    font-family: 'SF Mono', ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+    letter-spacing: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    transition: background .12s, color .12s;
+    display: inline-block;
+  }
+  .id-copy:hover { background: var(--accent-light); color: var(--accent); }
+  .id-copy.copied { background: #DCFCE7; color: #166534; }
+
+  /* La columna N° Pedido no trunca */
+  td:first-child { overflow: visible; white-space: nowrap; }
+
+  /* ── Logo en header ── */
+  .header-logo {
+    height: 32px;
+    width: auto;
+    max-width: 110px;
+    object-fit: contain;
+    transition: opacity .2s;
+    flex-shrink: 0;
+  }
+  .page-header { gap: 12px; align-items: center; }
+  .page-header-text { flex: 1; min-width: 0; }
+
+  /* ── Botones empresa ── */
+  .emp-btns {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .emp-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: #fff;
+    border: 1.5px solid var(--color-border-secondary);
+    border-radius: 10px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: border-color .13s, box-shadow .13s, background .13s;
+    height: 34px;
+  }
+  .emp-btn img {
+    height: 20px;
+    width: auto;
+    max-width: 70px;
+    object-fit: contain;
+  }
+  .emp-btn span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+  .emp-btn:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+  .emp-btn.active { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+
+  /* ── Pipeline card ── */
+  .pipeline-wrap {
+    background: #fff;
+    border: 1px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1.1rem 1.25rem 0;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .pipeline-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+  }
+  .pipeline-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .55px;
+    color: var(--color-text-secondary);
+  }
+  .pipeline-total {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+  .pipeline-stages {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: 0 -1.25rem;
+    border-top: 1px solid var(--color-border-secondary);
+  }
+  .pstage {
+    padding: .85rem 1rem .9rem;
+    position: relative;
+    border-right: 1px solid var(--color-border-secondary);
+    transition: background .12s;
+  }
+  .pstage:last-child { border-right: none; }
+  .pstage:hover { background: var(--color-background-secondary); }
+  .pstage-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .pstage-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--color-text-secondary);
+    margin-bottom: .45rem;
+    margin-top: .35rem;
+  }
+  .pstage-num {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1;
+    margin-bottom: .25rem;
+  }
+  .pstage-pct {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-bottom: .2rem;
+  }
+  .pstage-time {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+  .pstage-time b { color: var(--color-text-primary); font-weight: 500; }
+
+  /* ── Chevron stepper ── */
+  .chev-bar { display:flex; height:46px; margin:.4rem 0 .9rem; }
+  .chev {
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:2px; position:relative;
+    color:#fff; font-size:10px; font-weight:600;
+    padding:0 6px 0 20px;
+    clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%, 13px 50%);
+    margin-left:-2px;
+    transition:filter .2s, opacity .2s;
+  }
+  .chev:first-child {
+    clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%);
+    border-radius:6px 0 0 6px;
+    padding-left:10px;
+    margin-left:0;
+  }
+  .chev:last-child {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 13px 50%);
+    border-radius:0 6px 6px 0;
+  }
+  .chev.pending { filter:brightness(.55) saturate(.3); opacity:.65; }
+  .chev-check  { font-size:18px; line-height:1; }
+  .chev-lbl    { font-size:9px; font-weight:500; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .chev-time   { font-size:8px; opacity:.75; }
+  .chev-dots   { display:flex; gap:3px; align-items:center; margin-bottom:1px; }
+  .chev-dots span {
+    width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.85);
+    animation:cdot 1.3s ease-in-out infinite;
+  }
+  .chev-dots span:nth-child(2){animation-delay:.22s}
+  .chev-dots span:nth-child(3){animation-delay:.44s}
+  .chev-dots span:nth-child(4){animation-delay:.66s}
+  @keyframes cdot{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE — MOBILE  (≤ 640 px)
+     ═══════════════════════════════════════ */
+  @media (max-width: 640px) {
+
+    /* Header: logo + texto en primera fila, empresa buttons en segunda */
+    .page-header {
+      flex-wrap: wrap;
+      padding: .6rem .75rem .5rem;
+      gap: 6px 10px;
+    }
+    .header-logo { height: 24px; }
+    .page-header-text { flex: 1 1 0; min-width: 0; }
+    .page-header-title { font-size: 12px; }
+    .page-header-sub   { font-size: 10px; }
+
+    /* Empresa buttons: fila completa con scroll horizontal */
+    .emp-btns {
+      width: 100%;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 3px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 4px;
+    }
+    .emp-btns::-webkit-scrollbar { display: none; }
+    .emp-btn {
+      flex-shrink: 0;
+      height: 30px;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+    .emp-btn img { height: 17px; }
+
+    /* Pipeline: 2 columnas × 2 filas */
+    .pipeline-stages {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .pstage:nth-child(2) { border-right: none; }
+    .pstage:nth-child(3) { border-top: 1px solid var(--color-border-secondary); }
+    .pstage:nth-child(4) { border-top: 1px solid var(--color-border-secondary); border-right: none; }
+    .pstage-num  { font-size: 20px; }
+    .pipeline-total { font-size: 22px; }
+
+    /* Chevron: fuente más pequeña */
+    .chev { font-size: 8.5px; }
+    .chev-lbl { font-size: 7.5px; }
+    .chev-time { display: none; }
+
+    /* Contenedor central */
+    .page-body { padding: .75rem .5rem; }
+
+    /* Tabla: scroll horizontal */
+    .card { overflow-x: auto; }
+
+    /* Filtros: columna única */
+    .filter-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .filter-row > * { width: 100% !important; max-width: 100% !important; }
+    #q { width: 100% !important; }
+  }
+
+  /* RESPONSIVE — TABLET  (641 px – 900 px) */
+  @media (min-width: 641px) and (max-width: 900px) {
+    .page-header { padding: .75rem 1.25rem; flex-wrap: wrap; gap: 10px; }
+    .emp-btns { flex-wrap: wrap; }
+    .pipeline-stages { grid-template-columns: repeat(2, 1fr); }
+    .pstage:nth-child(2) { border-right: none; }
+    .pstage:nth-child(3) { border-top: 1px solid var(--color-border-secondary); }
+    .pstage:nth-child(4) { border-top: 1px solid var(--color-border-secondary); border-right: none; }
+  }
+</style>
+
+<!-- ── Función copiar N° Pedido ── -->
+<script>
+function copyId(el, id) {
+  navigator.clipboard.writeText(id).then(function () {
+    el.textContent = '¡Copiado!';
+    el.classList.add('copied');
+    setTimeout(function () {
+      el.textContent = id;
+      el.classList.remove('copied');
+    }, 1500);
+  }).catch(function () {
+    /* fallback para navegadores sin clipboard API */
+    var ta = document.createElement('textarea');
+    ta.value = id; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    el.textContent = '¡Copiado!';
+    el.classList.add('copied');
+    setTimeout(function () { el.textContent = id; el.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+
+<!-- ── Script de integración con la API Flask — Fase 2 ── -->
+<script>
+(function () {
+  /* ── Constantes de meses ── */
+  var MONTHS_ES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var MONTHS_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+  /* ── Estado de filtros de período ── */
+  var selYear  = null;
+  var selMonth = null;
+
+  /* ── Utilidades de fecha ── */
+  function parseISO(str) {
+    if (!str || str === '') return null;
+    var d = new Date(str);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function isoWeekInfo(date) {
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    var dow = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dow);
+    var y1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return { year: d.getUTCFullYear(), num: Math.ceil(((d - y1) / 86400000 + 1) / 7) };
+  }
+
+  function weekCode(date) {
+    var w = isoWeekInfo(date);
+    return w.year + '-W' + String(w.num).padStart(2, '0');
+  }
+
+  function weekMon(date) {
+    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    var dow = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() - dow + 1);
+    return d;
+  }
+
+  function fmtDay(d) { return d.getUTCDate() + ' ' + MONTHS_SHORT[d.getUTCMonth()]; }
+
+  function weekRangeStr(date) {
+    var mon = weekMon(date);
+    var sun = new Date(mon); sun.setUTCDate(sun.getUTCDate() + 6);
+    if (mon.getUTCMonth() === sun.getUTCMonth())
+      return mon.getUTCDate() + '–' + sun.getUTCDate() + ' ' + MONTHS_SHORT[mon.getUTCMonth()];
+    return fmtDay(mon) + ' – ' + fmtDay(sun);
+  }
+
+  function fmtDT(str) {
+    var d = parseISO(str);
+    if (!d) return null;
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') +
+           ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function diffMins(pairs) {
+    var result = [];
+    for (var i = 0; i < 4; i++) {
+      var a = parseISO(pairs[i*2]), b = parseISO(pairs[i*2+1]);
+      result.push((a && b && b > a) ? Math.round((b - a) / 60000) : null);
+    }
+    return result;
+  }
+
+  /* ── Mapeo de estados ── */
+  var STATUS_MAP = {
+    'FACTURADO':  'Facturado',
+    'AUTORIZADO': 'Autorizado',
+    'BACKORDER':  'Backorder',
+    'RETENIDO':   'Retenido',
+    'CANCELADO':  'Cancelado',
+    'ND':         'Pendiente',
+  };
+  function mapEstado(raw) {
+    return STATUS_MAP[(raw||'').toUpperCase().trim()] || raw || 'Pendiente';
+  }
+
+  /* ── Reconstruye WEEKS dinámico según filtro activo ── */
+  function rebuildWEEKS() {
+    var map = new Map();
+    orders.forEach(function(o) {
+      if (!o._fecha || !o.semana) return;
+      if (selEmpresas.size && !selEmpresas.has(o.empresa)) return;
+      if (selYear  && o._year  !== selYear)  return;
+      if (selMonth && o._month !== selMonth) return;
+      if (!map.has(o.semana))
+        map.set(o.semana, { code: o.semana, label: 'Sem. ' + o._weekNum, range: o._weekRange });
+    });
+    WEEKS = Array.from(map.values()).sort(function(a,b){ return b.code.localeCompare(a.code); });
+  }
+
+  /* ── Override: buildWeekPills dinámica ── */
+  window.buildWeekPills = function buildWeekPills() {
+    rebuildWEEKS();
+    var c = document.getElementById('week-pills');
+    c.innerHTML = '';
+    var visible = orders.filter(function(o){
+      return (!selEmpresas.size || selEmpresas.has(o.empresa)) &&
+             (!selYear  || o._year  === selYear) &&
+             (!selMonth || o._month === selMonth);
+    });
+
+    var all = document.createElement('div');
+    all.className = 'wpill-all' + (selectedWeeks.size===0?' active':'');
+    all.innerHTML =
+      '<div style="font-size:11px;font-weight:700;color:inherit">Todas</div>' +
+      '<div style="font-size:10px;color:var(--color-text-secondary);margin-top:1px">' + visible.length.toLocaleString('es') + ' pedidos</div>';
+    all.onclick = function(){ selectedWeeks.clear(); pg=0; buildWeekPills(); render(); };
+    c.appendChild(all);
+
+    WEEKS.forEach(function(w) {
+      var cnt = visible.filter(function(o){ return o.semana===w.code; }).length;
+      var pill = document.createElement('div');
+      pill.className = 'wpill' + (selectedWeeks.has(w.code)?' active':'');
+      pill.innerHTML =
+        '<div class="wpill-code">' + w.label + '</div>' +
+        '<div class="wpill-range">' + w.range + '</div>' +
+        '<div class="wpill-count">' + cnt.toLocaleString('es') + ' ped.</div>';
+      pill.onclick = (function(code){ return function(){
+        if (selectedWeeks.has(code)) selectedWeeks.delete(code); else selectedWeeks.add(code);
+        pg=0; buildWeekPills(); render();
+      }; })(w.code);
+      c.appendChild(pill);
+    });
+    document.getElementById('wclear').style.display = selectedWeeks.size>0?'inline':'none';
+  }
+
+  /* ── Override: filtered con año/mes/empresa ── */
+  window.filtered = function filtered() {
+    var q  = document.getElementById('q').value.toLowerCase();
+    var fe = document.getElementById('fest').value;
+    return orders.filter(function(o) {
+      return (!selEmpresas.size || selEmpresas.has(o.empresa)) &&
+             (!selYear  || o._year  === selYear)  &&
+             (!selMonth || o._month === selMonth) &&
+             (selectedWeeks.size===0 || selectedWeeks.has(o.semana)) &&
+             (!q || o.id.toLowerCase().includes(q) || o.factura.toLowerCase().includes(q) ||
+              o.client.toLowerCase().includes(q) ||
+              (o.transporte && o.transporte.chofer && o.transporte.chofer.toLowerCase().includes(q))) &&
+             (!fe || o.estado===fe);
+    });
+  }
+
+  /* ── Override: showDet con campos reales ── */
+  window.showDet = function showDet(id) {
+    var o = orders.find(function(x){ return x.id===id; });
+    if (!o) return;
+    var el = document.getElementById('detail');
+    var keys = ['recibido','preparacion','facturado','despachado'];
+    var labels = ['Pedido recibido','Autorizado','Facturado','Despachado'];
+    var activeIdx = keys.map(function(k){ return o.tiempos[k]!=null; }).lastIndexOf(true);
+    /* Si el estado del documento adelanta al último paso con fecha, usarlo */
+    var estadoMinIdx = { 'Facturado': 2, 'Autorizado': 1 }[o.estado];
+    if (estadoMinIdx !== undefined) activeIdx = Math.max(activeIdx, estadoMinIdx);
+    var CHEV_COLORS = ['#34D399','#14B8A6','#0EA5E9','#3B82F6'];
+    var tlSteps = '<div class="chev-bar">' + labels.map(function(l,i){
+      var isDone    = i < activeIdx;
+      var isActive  = i === activeIdx;
+      var cls       = isDone ? 'done' : isActive ? 'active' : 'pending';
+      var hora      = o.tiempos[keys[i]];
+      var inner;
+      if (isDone || (isActive && hora)) {
+        /* Paso completado: tiene timestamp → mostrar ✓ */
+        inner = '<div class="chev-check">✓</div>' +
+                '<div class="chev-lbl">' + l + '</div>' +
+                (hora ? '<div class="chev-time">' + hora + '</div>' : '');
+      } else if (isActive) {
+        /* Paso activo pero sin timestamp → en progreso (dots) */
+        inner = '<div class="chev-dots"><span></span><span></span><span></span><span></span></div>' +
+                '<div class="chev-lbl">' + l + '</div>';
+      } else {
+        inner = '<div class="chev-lbl">' + l + '</div>';
+      }
+      return '<div class="chev ' + cls + '" style="background:' + CHEV_COLORS[i] + '">' + inner + '</div>';
+    }).join('') + '</div>';
+
+    var tblock = o.transporte ? (
+      '<div class="transport-card">' +
+      '<div class="avatar">' + initials(o.transporte.chofer) + '</div>' +
+      '<div><div class="tc-name">'+o.transporte.chofer+'</div>' +
+      '<div class="tc-sub">'+o.transporte.empresa+'</div></div>' +
+      '<div class="tc-right"><div class="tc-plate">Viaje: '+o.transporte.vehiculo+'</div></div></div>' +
+      '<div class="tc-meta">' +
+      '<div class="tc-mf"><label>Fecha salida</label><span>'+o.transporte.salida+'</span></div>' +
+      '<div class="tc-mf"><label>Llegada cliente</label><span>'+o.transporte.llegada+'</span></div>' +
+      '</div>'
+    ) : '<div style="font-size:12px;color:var(--color-text-secondary);padding:.5rem 0">Sin transporte asignado (cliente retira o no despachado).</div>';
+
+    var wk = WEEKS.find(function(x){ return x.code===o.semana; });
+    el.innerHTML =
+      '<div class="det-head">' +
+        '<div><div class="det-title">'+o.id+' &mdash; '+o.client+'</div>' +
+        '<div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">' +
+          (o._weekNum ? 'Sem. '+o._weekNum+' &nbsp;·&nbsp; '+o._weekRange : '—') +
+          (o.ciudad ? ' &nbsp;·&nbsp; '+o.ciudad+', '+o.estadoGeo : '') + '</div></div>' +
+        '<button class="det-close" onclick="document.getElementById(\'detail\').className=\'detail\'">&#x2715;</button>' +
+      '</div>' +
+      '<div class="det-meta" style="grid-template-columns:repeat(4,1fr)">' +
+        '<div class="meta-f"><label>N° Factura</label><span style="font-weight:500">'+o.factura+'</span></div>' +
+        '<div class="meta-f"><label>Estado</label><span class="badge '+bc(o.estado)+'">'+o.estado+'</span></div>' +
+        '<div class="meta-f"><label>Monto total</label><span style="font-weight:500">$'+o.monto.toLocaleString('es')+'</span></div>' +
+        '<div class="meta-f"><label>Zona de venta</label><span>'+o.zona+'</span></div>' +
+      '</div>' +
+      '<p class="sec-title">Tiempo por etapa</p>' +
+      tlSteps +
+      '<p class="sec-title">Transporte</p>' +
+      tblock +
+      '<p class="sec-title">Líneas del pedido</p>' +
+      '<div class="lines-wrap"><table><thead><tr>' +
+        '<th>Artículo</th>' +
+        '<th>Factura</th>' +
+        '<th style="text-align:center">Cant. pedida</th>' +
+        '<th style="text-align:center">Cant. facturada</th>' +
+        '<th>Estado línea</th>' +
+        '<th>Estado FDV</th>' +
+        '<th style="text-align:right">Venta $</th>' +
+      '</tr></thead><tbody>' +
+        (o.lines.length ? o.lines.map(function(l){
+          var ventaStr = l.venta > 0 ? '$' + l.venta.toLocaleString('es', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+          var fdvBadge = l.estFdv ? '<span class="badge '+bl(l.estFdv)+'">'+l.estFdv+'</span>' : '<span style="color:var(--color-text-secondary)">—</span>';
+          return '<tr>' +
+            '<td style="font-family:monospace;font-size:11px">'+l.art+'</td>' +
+            '<td style="font-size:11px">'+l.factura+'</td>' +
+            '<td style="text-align:center">'+l.qped+'</td>' +
+            '<td style="text-align:center">'+l.qfact+'</td>' +
+            '<td><span class="badge '+bl(l.est)+'">'+l.est+'</span></td>' +
+            '<td>'+fdvBadge+'</td>' +
+            '<td style="text-align:right;font-weight:500">'+ventaStr+'</td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="6" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas — ejecuta Script_testin_v1.py para obtenerlas.</td></tr>') +
+      '</tbody></table></div>';
+    el.className = 'detail open';
+    el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  /* ── Filtro empresa (multi-select) + logo ── */
+  var selEmpresas = new Set();
+  var EMPRESA_LOGOS = {
+    'BEVAL':   '/logos/Beval.png',
+    'FEBECA':  '/logos/Febeca.png',
+    'SILLACA': '/logos/Sillaca.png',
+  };
+  function updateHeaderLogo() {
+    var logo = document.getElementById('header-logo');
+    if (!logo) return;
+    if (selEmpresas.size === 1) {
+      var emp = Array.from(selEmpresas)[0];
+      logo.src = EMPRESA_LOGOS[emp] || '/logos/Mayoreo.png';
+    } else {
+      logo.src = '/logos/Mayoreo.png';
+    }
+  }
+  window.onEmpresaFilter = function(btn) {
+    var emp = btn.getAttribute('data-emp') || '';
+    if (emp === '') {
+      selEmpresas.clear();
+    } else {
+      if (selEmpresas.has(emp)) selEmpresas.delete(emp);
+      else selEmpresas.add(emp);
+    }
+    /* Actualizar estado visual de botones */
+    document.querySelectorAll('.emp-btn').forEach(function(b) {
+      var e = b.getAttribute('data-emp') || '';
+      b.classList.toggle('active', e === '' ? selEmpresas.size === 0 : selEmpresas.has(e));
+    });
+    updateHeaderLogo();
+    selectedWeeks.clear(); pg = 0; buildWeekPills(); render();
+  };
+
+  /* ── Selectores año/mes ── */
+  function populatePeriodSelectors() {
+    var years = Array.from(new Set(
+      orders.filter(function(o){ return o._year; }).map(function(o){ return o._year; })
+    )).sort(function(a,b){ return b-a; });
+
+    var fyear = document.getElementById('fyear');
+    fyear.innerHTML = '';
+    selYear = years[0] || new Date().getFullYear();
+    years.forEach(function(y) {
+      var op = document.createElement('option');
+      op.value = y; op.textContent = y;
+      if (y === selYear) op.selected = true;
+      fyear.appendChild(op);
+    });
+    refreshMonthSelector();
+    populateEstadoSelector();
+  }
+
+  /* ── Selector de estado dinámico ── */
+  var STATE_ORDER = ['Facturado','Autorizado','Backorder','Bo Parcial','Retenido','Pendiente','Cancelado'];
+  function populateEstadoSelector() {
+    var existing = new Set(orders.map(function(o){ return o.estado; }));
+    var fest = document.getElementById('fest');
+    var cur  = fest.value;
+    fest.innerHTML = '<option value="">Todos los estados</option>';
+    STATE_ORDER.forEach(function(s) {
+      if (!existing.has(s)) return;
+      var op = document.createElement('option');
+      op.value = s; op.textContent = s;
+      if (s === cur) op.selected = true;
+      fest.appendChild(op);
+    });
+  }
+
+  function refreshMonthSelector() {
+    var months = Array.from(new Set(
+      orders.filter(function(o){
+        return o._year===selYear && o._month &&
+               (!selEmpresas.size || selEmpresas.has(o.empresa));
+      }).map(function(o){ return o._month; })
+    )).sort(function(a,b){ return a-b; });
+
+    var fmonth = document.getElementById('fmonth');
+    fmonth.innerHTML = '<option value="">Todos los meses</option>';
+    months.forEach(function(m) {
+      var op = document.createElement('option');
+      op.value = m; op.textContent = MONTHS_ES[m-1];
+      fmonth.appendChild(op);
+    });
+    var curMonth = new Date().getMonth() + 1;
+    if (months.includes(curMonth)) { fmonth.value = curMonth; selMonth = curMonth; }
+    else selMonth = null;
+  }
+
+  window.onYearChange  = function() {
+    selYear = parseInt(document.getElementById('fyear').value);
+    selectedWeeks.clear(); selMonth = null;
+    refreshMonthSelector(); pg=0; buildWeekPills(); render();
+  };
+  window.onMonthChange = function() {
+    var v = document.getElementById('fmonth').value;
+    selMonth = v ? parseInt(v) : null;
+    selectedWeeks.clear(); pg=0; buildWeekPills(); render();
+  };
+
+  /* ── Override: renderStages — pipeline card ── */
+  var STAGE_COLORS = ['#378ADD','#EF9F27','#9FE1CB','#4CAF50'];
+  window.renderStages = function renderStages(data) {
+    var keys   = ['recibido','preparacion','facturado','despachado'];
+    var labels = ['Recibido','Autorizado','Facturado','Despachado'];
+    var counts = [0,0,0,0], sums = [0,0,0,0], ns = [0,0,0,0];
+    data.forEach(function(o) {
+      keys.forEach(function(k,i){ if (o.tiempos[k]) counts[i]++; });
+      o.durMin.forEach(function(d,i){ if (d != null){ sums[i]+=d; ns[i]++; } });
+    });
+    var total = data.length || 1;
+    document.getElementById('stages').innerHTML = labels.map(function(l,i) {
+      var pct  = Math.round(counts[i] / total * 100);
+      var prom = ns[i] > 0 ? '<b>' + fmtMin(Math.round(sums[i]/ns[i])) + '</b>' : '—';
+      return '<div class="pstage">' +
+        '<div class="pstage-accent" style="background:' + STAGE_COLORS[i] + '"></div>' +
+        '<div class="pstage-label">' + l + '</div>' +
+        '<div class="pstage-num">'  + counts[i] + '</div>' +
+        '<div class="pstage-pct">'  + pct + '% del total</div>' +
+        '<div class="pstage-time">Prom: ' + prom + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ── Fetch principal (pedidos + líneas en paralelo) ── */
+  Promise.all([
+    fetch('/api/pedidos').then(function(r){
+      if (!r.ok) return r.json().then(function(e){ throw new Error(e.error||r.status); });
+      return r.json();
+    }),
+    fetch('/api/lineas').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; })
+  ])
+    .then(function(results) {
+      var data   = results[0];
+      var lineas = results[1];
+
+      /* Construir mapa de líneas por pedido */
+      var lineMap = new Map();
+      (Array.isArray(lineas) ? lineas : []).forEach(function(row) {
+        var pid = String(row['NUMERO PEDIDO'] || '').trim();
+        if (!lineMap.has(pid)) lineMap.set(pid, []);
+        var art = (row['COD-ART'] || '').trim();
+        if (art) lineMap.get(pid).push({
+          art:     art,
+          factura: (function(v){ return (!v||v==='BACKORDER'||v.trim()==='') ? '—' : String(v); })(row['NUMERO FACTURA']),
+          qped:    parseFloat(row['CANT PEDIDA'])      || 0,
+          qfact:   parseFloat(row['CANTIDAD ART'])     || 0,
+          est:     (row['ESTATUS LINEA']     || '').trim(),
+          estFdv:  (row['ESTATUS LINEA FDV'] || '').trim(),
+          venta:   parseFloat(row['VENTA DOLARES'])    || 0
+        });
+      });
+
+      orders.length = 0;
+      data.forEach(function(row) {
+        var fecha  = parseISO(row['FECHA PEDIDO']);
+        var wCode  = fecha ? weekCode(fecha) : null;
+        var wInfo  = fecha ? isoWeekInfo(fecha) : null;
+        var wRange = fecha ? weekRangeStr(fecha) : '';
+        var conductor = (row['Conductor']  || '').trim();
+        var transp    = (row['Transporte'] || '').trim();
+        var viaje     = (row['NUMERO VIAJE'] || '').trim();
+        var hasDriver = conductor !== '';
+        var pid = String(row['NUMERO PEDIDO'] || '');
+        orders.push({
+          id:        pid,
+          empresa:   (row['EMPRESA'] || '').trim(),
+          client:    String(row['RAZON SOCIAL']  || ''),
+          factura:   (function(v){ return (!v||v==='BACKORDER'||v.trim()==='') ? '' : String(v); })(row['NUMERO FACTURA']),
+          estado:    mapEstado(row['ESTADO DEL DOCUMENTO']),
+          monto:     parseFloat(row['MONTO TOTAL']) || 0,
+          semana:    wCode,
+          _fecha:    fecha,
+          _weekNum:  wInfo ? wInfo.num : null,
+          _weekRange:wRange,
+          _year:     fecha ? fecha.getFullYear()    : null,
+          _month:    fecha ? fecha.getMonth()+1     : null,
+          ciudad:    row['CIUDAD']         || '',
+          estadoGeo: row['ESTADO']         || '',
+          zona:      String(row['ZONA DE VENTA'] || ''),
+          transporte: hasDriver ? {
+            chofer:   conductor,
+            empresa:  transp || '—',
+            vehiculo: viaje  || '—',
+            salida:   fmtDT(row['FECHA SALIDA'])          || '—',
+            llegada:  fmtDT(row['FECHA_LLEGADA_CLIENTE']) || '—',
+          } : null,
+          tiempos: {
+            recibido:    fmtDT(row['FECHA PEDIDO']),
+            preparacion: fmtDT(row['FECHA LIBERACION']),
+            despachado:  fmtDT(row['FECHA SALIDA']),
+            facturado:   fmtDT(row['FECHA FACTURACION'])
+          },
+          durMin: diffMins([
+            row['FECHA PEDIDO'],       row['FECHA LIBERACION'],
+            row['FECHA LIBERACION'],   row['FECHA FACTURACION'],
+            row['FECHA FACTURACION'],  row['FECHA SALIDA'],
+            null, null
+          ]),
+          lines: lineMap.get(pid) || []
+        });
+      });
+
+      var now = new Date();
+      document.getElementById('last-update').textContent =
+        'Última actualización: ' + now.toLocaleDateString('es-VE') + ' ' +
+        now.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+
+      populatePeriodSelectors();
+      buildWeekPills();
+      render();
+    })
+    .catch(function(err) {
+      console.error('Error al cargar pedidos:', err);
+      document.getElementById('tbody').innerHTML =
+        '<tr><td colspan="8" style="text-align:center;color:#A32D2D;padding:1.5rem">' +
+        'Error al cargar datos: ' + err.message + '</td></tr>';
+      document.getElementById('last-update').textContent = 'Error al conectar con el servidor';
+    });
+})();
+</script>
+
+</div><!-- /.page-body -->
+
+</body>
+</html>
