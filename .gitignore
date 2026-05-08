@@ -3,8 +3,10 @@
 venv/
 env/
 
-# Datos generados (sensibles)
-*.csv
+# Datos generados (sensibles) — los demo CSVs SÍ van al repo
+# *.csv
+datos_lineas_web_full.csv
+datos_pedidos_web_full.csv
 
 # Claude Code
 .claude/

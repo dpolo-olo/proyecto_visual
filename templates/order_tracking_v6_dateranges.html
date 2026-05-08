@@ -1069,8 +1069,7 @@ function copyId(el, id) {
           (o.ciudad ? ' &nbsp;·&nbsp; '+o.ciudad+', '+o.estadoGeo : '') + '</div></div>' +
         '<button class="det-close" onclick="document.getElementById(\'detail\').className=\'detail\'">&#x2715;</button>' +
       '</div>' +
-      '<div class="det-meta" style="grid-template-columns:repeat(4,1fr)">' +
-        '<div class="meta-f"><label>N° Factura</label><span style="font-weight:500">'+o.factura+'</span></div>' +
+      '<div class="det-meta" style="grid-template-columns:repeat(3,1fr)">' +
         '<div class="meta-f"><label>Estado</label><span class="badge '+bc(o.estado)+'">'+o.estado+'</span></div>' +
         '<div class="meta-f"><label>Monto total</label><span style="font-weight:500">$'+o.monto.toLocaleString('es')+'</span></div>' +
         '<div class="meta-f"><label>Zona de venta</label><span>'+o.zona+'</span></div>' +
