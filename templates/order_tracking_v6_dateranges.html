@@ -190,6 +190,12 @@ tr:hover td{background:var(--color-background-secondary)}
 </head>
 <body>
 
+<!-- ── Loading overlay ── -->
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Cargando datos...</div>
+</div>
+
 <!-- ── Header de página ── -->
 <header class="page-header">
   <img id="header-logo" src="/logos/Mayoreo.png" alt="Logo" class="header-logo">
@@ -787,6 +793,39 @@ render();
   @keyframes cdot{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
   /* ── Skeleton loading ── */
+  /* ── Loading overlay ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(241,245,249,.92);
+    backdrop-filter: blur(3px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 9999;
+    transition: opacity .35s ease;
+  }
+  #loading-overlay.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .loading-spinner {
+    width: 44px; height: 44px;
+    border: 3px solid #CBD5E1;
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  .loading-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+  /* Skeleton (se mantiene por si acaso) */
   @keyframes shimmer {
     0%   { background-position: -600px 0; }
     100% { background-position:  600px 0; }
@@ -802,7 +841,6 @@ render();
   .skel-num   { height: 28px; border-radius: 6px; }
   .skel-badge { height: 20px; border-radius: 20px; width: 72px; }
   .skel-row td { padding: 10px 12px; }
-  /* Pipeline skeleton */
   .pstage-skel { padding: .85rem 1rem .9rem; border-right: 1px solid var(--color-border-secondary); }
   .pstage-skel:last-child { border-right: none; }
 
@@ -1350,9 +1388,14 @@ function copyId(el, id) {
       populatePeriodSelectors();
       buildWeekPills();
       render();
+      /* Ocultar overlay de carga */
+      var ov = document.getElementById('loading-overlay');
+      if (ov) ov.classList.add('hide');
     })
     .catch(function(err) {
       console.error('Error al cargar pedidos:', err);
+      var ov = document.getElementById('loading-overlay');
+      if (ov) ov.classList.add('hide');
       document.getElementById('tbody').innerHTML =
         '<tr><td colspan="8" style="text-align:center;color:#A32D2D;padding:1.5rem">' +
         'Error al cargar datos: ' + err.message + '</td></tr>';
