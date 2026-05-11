@@ -241,7 +241,7 @@ tr:hover td{background:var(--color-background-secondary)}
 <div class="filter-inline">
 
   <!-- Fila 1: Empresa -->
-  <div class="fi-row fi-row-empresa">
+  <div class="fi-empresa">
     <div class="emp-btns" id="emp-btns">
       <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
         <img src="/logos/Mayoreo.png" alt="Todas"><span>Todas</span>
@@ -260,15 +260,19 @@ tr:hover td{background:var(--color-background-secondary)}
 
   <div class="fi-divider"></div>
 
-  <!-- Fila 2: Período + Estado + Monto -->
-  <div class="fi-row fi-row-controls">
+  <!-- Fila 2: Período -->
+  <div class="fi-period">
     <select id="fyear" onchange="onYearChange()"></select>
-    <select id="fmonth" onchange="onMonthChange()" style="flex:1.5"></select>
-    <div class="fi-sep"></div>
-    <select id="fest" onchange="pg=0;render();updateActiveChips()" style="flex:1.5;min-width:120px">
-      <option value="">Todos los estados</option>
-    </select>
-    <div class="fi-sep"></div>
+    <select id="fmonth" onchange="onMonthChange()"></select>
+  </div>
+
+  <!-- Fila 3: Estado -->
+  <select id="fest" class="fi-estado" onchange="pg=0;render();updateActiveChips()">
+    <option value="">Todos los estados</option>
+  </select>
+
+  <!-- Fila 4: Monto -->
+  <div class="fi-monto">
     <input type="number" id="monto-min" placeholder="$ Desde" min="0" oninput="pg=0;render();updateActiveChips()">
     <input type="number" id="monto-max" placeholder="$ Hasta" min="0" oninput="pg=0;render();updateActiveChips()">
   </div>
@@ -811,29 +815,41 @@ render();
   /* ── Barra de filtros inline ── */
   .filter-inline {
     background:#fff; border:1px solid var(--color-border-secondary);
-    border-radius:var(--border-radius-lg); padding:.6rem .9rem;
+    border-radius:var(--border-radius-lg); padding:.65rem .9rem;
     box-shadow:var(--shadow-sm); margin-bottom:.7rem;
-    display:flex; flex-direction:column; gap:0;
+    display:flex; flex-direction:column; gap:8px;
   }
   .fi-divider {
-    height:1px; background:var(--color-border-tertiary);
-    margin:.55rem -.9rem;
+    height:1px; background:var(--color-border-tertiary); margin:0 -.9rem;
   }
-  .fi-row { display:flex; align-items:center; gap:6px; }
-  .fi-row-empresa .emp-btns {
-    display:flex; gap:5px; flex-wrap:nowrap;
+
+  /* Empresa */
+  .fi-empresa .emp-btns {
+    display:flex; gap:6px; flex-wrap:nowrap;
     overflow-x:auto; scrollbar-width:none; padding-bottom:1px;
   }
-  .fi-row-empresa .emp-btns::-webkit-scrollbar { display:none; }
-  .fi-row-empresa .emp-btn { height:30px; padding:3px 9px; flex-shrink:0; }
-  .fi-row-empresa .emp-btn img { height:17px; }
-  .fi-row-empresa .emp-btn span { font-size:10px; }
-  .fi-row-controls { flex-wrap:wrap; }
-  .fi-row-controls select,
-  .fi-row-controls input[type="number"] { height:32px; font-size:12px; flex:1; min-width:80px; }
-  .fi-sep {
-    width:1px; height:20px; background:var(--color-border-secondary);
-    flex-shrink:0; margin:0 1px;
+  .fi-empresa .emp-btns::-webkit-scrollbar { display:none; }
+  .fi-empresa .emp-btn { height:30px; padding:3px 10px; flex-shrink:0; }
+  .fi-empresa .emp-btn img { height:17px; }
+  .fi-empresa .emp-btn span { font-size:10px; }
+
+  /* Período, Estado, Monto — en desktop: fila única */
+  .fi-period, .fi-monto { display:flex; gap:8px; }
+  .fi-period select, .fi-monto input[type="number"] { flex:1; height:34px; font-size:12.5px; }
+  .fi-estado { height:34px; font-size:12.5px; width:100%; }
+
+  /* Desktop: período + estado + monto en una sola fila */
+  @media (min-width: 641px) {
+    .filter-inline { flex-direction:row; align-items:center; gap:8px; flex-wrap:wrap; }
+    .fi-divider { width:1px; height:22px; margin:0 2px; }
+    .fi-empresa { flex-shrink:0; }
+    .fi-period { flex-shrink:0; gap:6px; }
+    .fi-period select { height:32px; width:auto; }
+    #fyear  { width:72px; }
+    #fmonth { width:110px; }
+    .fi-estado { width:140px; }
+    .fi-monto { flex-shrink:0; gap:6px; }
+    .fi-monto input[type="number"] { width:95px; flex:none; height:32px; }
   }
 
   /* ── Fila de semanas siempre visible ── */
@@ -1078,19 +1094,11 @@ render();
     /* Tabla: scroll horizontal */
     .card { overflow-x: auto; }
 
-    /* Filtros inline en móvil */
-    .filter-inline { padding:.55rem .75rem; }
-    .fi-row-controls { gap:5px; }
-    .fi-row-controls select,
-    .fi-row-controls input[type="number"] { min-width:0; flex:1; font-size:11.5px; }
-    /* En móvil: período en fila 1, estado+monto en fila 2 */
-    .fi-row-controls { flex-wrap:wrap; }
-    #fyear  { flex:0 0 70px; }
-    #fmonth { flex:1; }
-    .fi-row-controls .fi-sep:first-of-type { display:none; }
-    #fest { flex:0 0 100%; order:3; }
-    #monto-min, #monto-max { flex:1; order:4; min-width:80px; }
-    .fi-row-controls .fi-sep:last-of-type { display:none; }
+    /* Filtros inline en móvil — columna limpia */
+    .filter-inline { padding:.6rem .75rem; gap:9px; }
+    .fi-period select { font-size:13px; }
+    .fi-estado { font-size:13px; }
+    .fi-monto input[type="number"] { font-size:13px; }
   }
 
   /* RESPONSIVE — TABLET  (641 px – 900 px) */
