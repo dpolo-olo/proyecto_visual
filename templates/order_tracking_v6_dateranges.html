@@ -179,10 +179,10 @@ tr:hover td{background:var(--color-background-secondary)}
 .tl-step-label{font-size:9px;color:var(--color-text-secondary);text-align:center;line-height:1.3}
 .tl-step-time{font-size:10px;font-weight:500;color:var(--color-text-primary);text-align:center;margin-top:2px}
 .tl-step.active .tl-step-label{color:var(--color-text-primary)}
-.lines-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
-.lines-wrap table{font-size:11px}
-.lines-wrap th{font-size:10px;padding:6px 8px}
-.lines-wrap td{padding:6px 8px}
+.lines-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.lines-wrap table{font-size:11px;min-width:480px;width:100%}
+.lines-wrap th{font-size:10px;padding:6px 8px;white-space:nowrap}
+.lines-wrap td{padding:6px 8px;white-space:nowrap}
 .pg{display:flex;gap:6px;justify-content:flex-end;align-items:center;font-size:12px;color:var(--color-text-secondary)}
 .pg-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:3px 9px;font-size:11px;cursor:pointer;color:var(--color-text-primary)}
 .pg-btn:disabled{opacity:0.4;cursor:default}
@@ -1081,7 +1081,6 @@ function copyId(el, id) {
       '<p class="sec-title">Líneas del pedido</p>' +
       '<div class="lines-wrap"><table><thead><tr>' +
         '<th>Artículo</th>' +
-        '<th>Factura</th>' +
         '<th style="text-align:center">Cant. pedida</th>' +
         '<th style="text-align:center">Cant. facturada</th>' +
         '<th>Estado línea</th>' +
@@ -1093,14 +1092,13 @@ function copyId(el, id) {
           var fdvBadge = l.estFdv ? '<span class="badge '+bl(l.estFdv)+'">'+l.estFdv+'</span>' : '<span style="color:var(--color-text-secondary)">—</span>';
           return '<tr>' +
             '<td style="font-family:monospace;font-size:11px">'+l.art+'</td>' +
-            '<td style="font-size:11px">'+l.factura+'</td>' +
             '<td style="text-align:center">'+l.qped+'</td>' +
             '<td style="text-align:center">'+l.qfact+'</td>' +
             '<td><span class="badge '+bl(l.est)+'">'+l.est+'</span></td>' +
             '<td>'+fdvBadge+'</td>' +
             '<td style="text-align:right;font-weight:500">'+ventaStr+'</td>' +
           '</tr>';
-        }).join('') : '<tr><td colspan="6" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas — ejecuta Script_testin_v1.py para obtenerlas.</td></tr>') +
+        }).join('') : '<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas — ejecuta Script_testin_v1.py para obtenerlas.</td></tr>') +
       '</tbody></table></div>';
     el.className = 'detail open';
     el.scrollIntoView({ behavior:'smooth', block:'nearest' });
