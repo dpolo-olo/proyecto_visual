@@ -235,13 +235,41 @@ tr:hover td{background:var(--color-background-secondary)}
 
 <div class="search-bar">
   <input type="text" placeholder="Buscar pedido, factura o cliente..." id="q" oninput="pg=0;render()">
-  <button class="btn-filter" id="btn-filter" onclick="toggleDrawer()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-    Filtros
-    <span class="filter-badge" id="filter-badge" style="display:none">0</span>
-  </button>
 </div>
-<div class="active-chips" id="active-chips"></div>
+
+<!-- ── Barra de filtros inline ── -->
+<div class="filter-inline">
+  <div class="emp-btns" id="emp-btns">
+    <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Mayoreo.png" alt="Todas"><span>Todas</span>
+    </button>
+    <button class="emp-btn" data-emp="BEVAL" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Beval.png" alt="Beval"><span>Beval</span>
+    </button>
+    <button class="emp-btn" data-emp="FEBECA" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Febeca.png" alt="Febeca"><span>Febeca</span>
+    </button>
+    <button class="emp-btn" data-emp="SILLACA" onclick="onEmpresaFilter(this)">
+      <img src="/logos/Sillaca.png" alt="Sillaca"><span>Sillaca</span>
+    </button>
+  </div>
+  <div class="fi-sep"></div>
+  <select id="fyear" onchange="onYearChange()"></select>
+  <select id="fmonth" onchange="onMonthChange()"></select>
+  <div class="fi-sep"></div>
+  <select id="fest" onchange="pg=0;render();updateActiveChips()" style="min-width:130px">
+    <option value="">Todos los estados</option>
+  </select>
+  <div class="fi-sep"></div>
+  <input type="number" id="monto-min" placeholder="$ Desde" min="0" oninput="pg=0;render();updateActiveChips()" style="width:95px">
+  <input type="number" id="monto-max" placeholder="$ Hasta" min="0" oninput="pg=0;render();updateActiveChips()" style="width:95px">
+</div>
+
+<!-- ── Semanas ── -->
+<div class="week-filter">
+  <div id="drawer-week-pills"></div>
+  <button class="week-clear" id="wclear" style="display:none;flex-shrink:0;font-size:11px;background:none;border:none;cursor:pointer;color:var(--accent);padding:0;margin-left:4px" onclick="clearWeeks()">× Limpiar</button>
+</div>
 
 <div id="detail" class="detail"></div>
 
@@ -766,38 +794,36 @@ render();
   .chev-dots span:nth-child(4){animation-delay:.66s}
   @keyframes cdot{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
-  /* ── Filter button & search bar ── */
-  .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:.75rem; }
+  /* ── Search bar ── */
+  .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:.6rem; }
   .search-bar input[type="text"] { flex:1; }
-  .btn-filter {
-    display:flex; align-items:center; gap:6px; flex-shrink:0;
-    background:#fff; border:1.5px solid var(--color-border-secondary);
-    border-radius:var(--border-radius-md); padding:.45rem .9rem;
-    font-size:12px; font-weight:500; cursor:pointer; color:var(--color-text-primary);
-    font-family:var(--font-sans); height:36px;
-    transition:border-color .15s, box-shadow .15s;
-  }
-  .btn-filter:hover { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
-  .btn-filter.has-filters { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
-  .btn-filter svg { width:14px; height:14px; flex-shrink:0; }
-  .filter-badge {
-    background:var(--accent); color:#fff; border-radius:99px;
-    font-size:10px; font-weight:700; padding:1px 6px; margin-left:1px;
-  }
 
-  /* ── Active filter chips ── */
-  .active-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:.85rem; min-height:0; }
-  .active-chip {
-    display:inline-flex; align-items:center; gap:4px;
-    background:var(--accent-light); color:var(--accent);
-    border:1px solid rgba(37,99,235,.2); border-radius:99px;
-    font-size:11px; font-weight:500; padding:3px 8px 3px 10px;
+  /* ── Barra de filtros inline ── */
+  .filter-inline {
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    background:#fff; border:1px solid var(--color-border-secondary);
+    border-radius:var(--border-radius-lg); padding:.5rem .85rem;
+    box-shadow:var(--shadow-sm); margin-bottom:.7rem;
   }
-  .active-chip button {
-    background:none; border:none; cursor:pointer; color:var(--accent);
-    font-size:14px; line-height:1; padding:0 0 0 2px;
-    display:flex; align-items:center;
+  .fi-sep {
+    width:1px; height:20px; background:var(--color-border-secondary);
+    flex-shrink:0; margin:0 2px;
   }
+  .filter-inline select { height:32px; font-size:12px; }
+  .filter-inline input[type="number"] { height:32px; font-size:12px; }
+  .filter-inline .emp-btn { height:30px; padding:3px 8px; }
+  .filter-inline .emp-btn img { height:17px; }
+  .filter-inline .emp-btn span { font-size:10px; }
+
+  /* ── Fila de semanas siempre visible ── */
+  .week-filter {
+    display:flex; align-items:center; gap:6px;
+    margin-bottom:.75rem; overflow-x:auto; padding-bottom:3px;
+    scrollbar-width:thin; scrollbar-color:var(--color-border-secondary) transparent;
+  }
+  .week-filter::-webkit-scrollbar { height:3px; }
+  .week-filter::-webkit-scrollbar-thumb { background:var(--color-border-secondary); border-radius:99px; }
+  #drawer-week-pills { display:flex; gap:6px; flex-wrap:nowrap; }
 
   /* ── Pipeline collapse ── */
   .pipeline-stages {
@@ -1618,87 +1644,6 @@ function updateActiveChips() {
 })();
 </script>
 
-<!-- ── Drawer overlay ── -->
-<div id="drawer-overlay" onclick="toggleDrawer()"></div>
-
-<!-- ── Filter drawer ── -->
-<div id="filter-drawer">
-  <div class="drawer-hdr">
-    <span class="drawer-title">Filtros</span>
-    <button class="drawer-close" onclick="toggleDrawer()" title="Cerrar">&#x2715;</button>
-  </div>
-
-  <div class="drawer-body">
-
-    <!-- Empresa -->
-    <div class="drawer-section">
-      <div class="drawer-sec-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Empresa
-      </div>
-      <div class="emp-btns in-drawer" id="emp-btns">
-        <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
-          <img src="/logos/Mayoreo.png" alt="Todas"><span>Todas</span>
-        </button>
-        <button class="emp-btn" data-emp="BEVAL" onclick="onEmpresaFilter(this)">
-          <img src="/logos/Beval.png" alt="Beval"><span>Beval</span>
-        </button>
-        <button class="emp-btn" data-emp="FEBECA" onclick="onEmpresaFilter(this)">
-          <img src="/logos/Febeca.png" alt="Febeca"><span>Febeca</span>
-        </button>
-        <button class="emp-btn" data-emp="SILLACA" onclick="onEmpresaFilter(this)">
-          <img src="/logos/Sillaca.png" alt="Sillaca"><span>Sillaca</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Período -->
-    <div class="drawer-section">
-      <div class="drawer-sec-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Período
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:.85rem">
-        <select id="fyear" onchange="onYearChange()" style="flex:1"></select>
-        <select id="fmonth" onchange="onMonthChange()" style="flex:2"></select>
-      </div>
-      <div id="drawer-week-pills"></div>
-      <button class="week-clear" id="wclear" style="display:none;margin-top:8px;font-size:11px;background:none;border:none;cursor:pointer;color:var(--accent);padding:0" onclick="clearWeeks()">× Limpiar semanas</button>
-    </div>
-
-    <!-- Estado -->
-    <div class="drawer-section">
-      <div class="drawer-sec-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Estado del pedido
-      </div>
-      <select id="fest" onchange="pg=0;render();updateActiveChips()" style="width:100%">
-        <option value="">Todos los estados</option>
-      </select>
-    </div>
-
-    <!-- Monto -->
-    <div class="drawer-section">
-      <div class="drawer-sec-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        Monto total ($)
-      </div>
-      <div style="margin-bottom:4px">
-        <div class="monto-label">Desde</div>
-        <input type="number" id="monto-min" placeholder="0" min="0" oninput="pg=0;render();updateActiveChips()">
-      </div>
-      <div>
-        <div class="monto-label">Hasta</div>
-        <input type="number" id="monto-max" placeholder="Sin límite" min="0" oninput="pg=0;render();updateActiveChips()">
-      </div>
-    </div>
-
-  </div>
-
-  <div class="drawer-footer">
-    <button class="btn-clear-all" onclick="clearAllFilters()">Limpiar todos los filtros</button>
-  </div>
-</div>
 
 </div><!-- /.page-body -->
 
