@@ -203,21 +203,6 @@ tr:hover td{background:var(--color-background-secondary)}
     <div class="page-header-title">Reporte de Pedidos</div>
     <div class="page-header-sub" id="last-update">Cargando datos...</div>
   </div>
-  <div class="emp-btns" id="emp-btns">
-    <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
-      <img src="/logos/Mayoreo.png" alt="Todas">
-      <span>Todas</span>
-    </button>
-    <button class="emp-btn" data-emp="BEVAL" onclick="onEmpresaFilter(this)">
-      <img src="/logos/Beval.png" alt="Beval">
-    </button>
-    <button class="emp-btn" data-emp="FEBECA" onclick="onEmpresaFilter(this)">
-      <img src="/logos/Febeca.png" alt="Febeca">
-    </button>
-    <button class="emp-btn" data-emp="SILLACA" onclick="onEmpresaFilter(this)">
-      <img src="/logos/Sillaca.png" alt="Sillaca">
-    </button>
-  </div>
 </header>
 
 <!-- ── Cuerpo de página ── -->
@@ -229,7 +214,10 @@ tr:hover td{background:var(--color-background-secondary)}
 <div class="pipeline-wrap">
   <div class="pipeline-hdr">
     <span class="pipeline-title">Pipeline de pedidos</span>
-    <span class="pipeline-total" id="kp-ord"><span class="skel skel-num" style="width:60px">&nbsp;</span></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="pipeline-total" id="kp-ord"><span class="skel skel-num" style="width:60px">&nbsp;</span></span>
+      <button class="pipeline-toggle" onclick="togglePipeline()" title="Colapsar">▾</button>
+    </div>
   </div>
   <div class="pipeline-stages" id="stages">
     <div class="pstage-skel"><span class="skel skel-text" style="width:70px;margin-bottom:10px;display:block">&nbsp;</span><span class="skel skel-num" style="width:50px;display:block">&nbsp;</span></div>
@@ -243,31 +231,16 @@ tr:hover td{background:var(--color-background-secondary)}
 <span id="kp-mnt" style="display:none"></span>
 <span id="kp-time" style="display:none"></span>
 
-<!-- Selector de semanas con rangos -->
-<div class="week-section">
-  <div class="week-section-head">
-    <span class="week-section-title">Filtrar por período</span>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <select id="fyear" onchange="onYearChange()" style="width:auto;min-width:80px"></select>
-      <select id="fmonth" onchange="onMonthChange()" style="width:auto;min-width:130px"></select>
-      <button class="week-clear" id="wclear" style="display:none" onclick="clearWeeks()">Limpiar semanas</button>
-    </div>
-  </div>
-  <div class="week-pills" id="week-pills">
-    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
-    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
-    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
-    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
-    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
-  </div>
-</div>
 
-<div class="filter-row">
+<div class="search-bar">
   <input type="text" placeholder="Buscar pedido, factura o cliente..." id="q" oninput="pg=0;render()">
-  <select id="fest" onchange="pg=0;render()">
-    <option value="">Todos los estados</option>
-  </select>
+  <button class="btn-filter" id="btn-filter" onclick="toggleDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    Filtros
+    <span class="filter-badge" id="filter-badge" style="display:none">0</span>
+  </button>
 </div>
+<div class="active-chips" id="active-chips"></div>
 
 <div id="detail" class="detail"></div>
 
@@ -792,6 +765,111 @@ render();
   .chev-dots span:nth-child(4){animation-delay:.66s}
   @keyframes cdot{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
+  /* ── Filter button & search bar ── */
+  .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:.75rem; }
+  .search-bar input[type="text"] { flex:1; }
+  .btn-filter {
+    display:flex; align-items:center; gap:6px; flex-shrink:0;
+    background:#fff; border:1.5px solid var(--color-border-secondary);
+    border-radius:var(--border-radius-md); padding:.45rem .9rem;
+    font-size:12px; font-weight:500; cursor:pointer; color:var(--color-text-primary);
+    font-family:var(--font-sans); height:36px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .btn-filter:hover { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+  .btn-filter.has-filters { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+  .btn-filter svg { width:14px; height:14px; flex-shrink:0; }
+  .filter-badge {
+    background:var(--accent); color:#fff; border-radius:99px;
+    font-size:10px; font-weight:700; padding:1px 6px; margin-left:1px;
+  }
+
+  /* ── Active filter chips ── */
+  .active-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:.85rem; min-height:0; }
+  .active-chip {
+    display:inline-flex; align-items:center; gap:4px;
+    background:var(--accent-light); color:var(--accent);
+    border:1px solid rgba(37,99,235,.2); border-radius:99px;
+    font-size:11px; font-weight:500; padding:3px 8px 3px 10px;
+  }
+  .active-chip button {
+    background:none; border:none; cursor:pointer; color:var(--accent);
+    font-size:14px; line-height:1; padding:0 0 0 2px;
+    display:flex; align-items:center;
+  }
+
+  /* ── Pipeline collapse ── */
+  .pipeline-stages {
+    transition: max-height .3s ease, opacity .3s ease;
+    max-height: 300px; overflow: hidden; opacity: 1;
+  }
+  .pipeline-wrap.collapsed .pipeline-stages { max-height:0; opacity:0; }
+  .pipeline-toggle {
+    background:none; border:none; cursor:pointer;
+    color:var(--color-text-secondary); padding:3px 6px;
+    border-radius:6px; transition:transform .25s, background .15s;
+    font-size:13px; line-height:1;
+  }
+  .pipeline-toggle:hover { background:var(--color-background-secondary); color:var(--color-text-primary); }
+  .pipeline-wrap.collapsed .pipeline-toggle { transform:rotate(180deg); }
+
+  /* ── Filter drawer ── */
+  #drawer-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.3);
+    z-index:998; opacity:0; pointer-events:none;
+    transition:opacity .25s;
+  }
+  #drawer-overlay.open { opacity:1; pointer-events:all; }
+  #filter-drawer {
+    position:fixed; top:0; right:-380px; width:340px; height:100vh;
+    background:#fff; z-index:999;
+    box-shadow:-4px 0 30px rgba(0,0,0,.12);
+    transition:right .25s cubic-bezier(.4,0,.2,1);
+    display:flex; flex-direction:column;
+  }
+  #filter-drawer.open { right:0; }
+  .drawer-hdr {
+    padding:.9rem 1.1rem; border-bottom:1px solid var(--color-border-secondary);
+    display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
+  }
+  .drawer-title { font-size:13px; font-weight:600; color:var(--color-text-primary); }
+  .drawer-close {
+    background:none; border:none; cursor:pointer; font-size:18px;
+    color:var(--color-text-secondary); padding:4px 6px; border-radius:6px;
+    line-height:1;
+  }
+  .drawer-close:hover { background:var(--color-background-secondary); }
+  .drawer-body { flex:1; overflow-y:auto; padding:1.1rem; display:flex; flex-direction:column; gap:1.1rem; }
+  .drawer-sec-title {
+    font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.6px; color:var(--color-text-secondary); margin-bottom:.55rem;
+  }
+  .drawer-footer {
+    padding:.85rem 1.1rem; border-top:1px solid var(--color-border-secondary);
+    flex-shrink:0;
+  }
+  .btn-clear-all {
+    width:100%; background:var(--color-background-secondary);
+    border:1.5px solid var(--color-border-secondary);
+    border-radius:var(--border-radius-md); font-size:12px; font-weight:500;
+    cursor:pointer; padding:.5rem; color:var(--color-text-secondary);
+    font-family:var(--font-sans);
+  }
+  .btn-clear-all:hover { border-color:var(--color-border-primary); color:var(--color-text-primary); }
+  .monto-row { display:flex; gap:8px; align-items:center; }
+  .monto-row input { flex:1; }
+  .monto-row span { font-size:12px; color:var(--color-text-secondary); flex-shrink:0; }
+  /* Drawer week pills más compactas */
+  #drawer-week-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  #drawer-week-pills .wpill, #drawer-week-pills .wpill-all {
+    font-size:10px; padding:5px 8px; min-width:0;
+  }
+  #drawer-week-pills .wpill-count, #drawer-week-pills .wpill-range { font-size:9px; }
+
+  @media (max-width:640px) {
+    #filter-drawer { width:100%; right:-100%; }
+  }
+
   /* ── Skeleton loading ── */
   /* ── Loading overlay ── */
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -943,6 +1021,78 @@ function copyId(el, id) {
     setTimeout(function () { el.textContent = id; el.classList.remove('copied'); }, 1500);
   });
 }
+function togglePipeline() {
+  var w = document.querySelector('.pipeline-wrap');
+  if (w) w.classList.toggle('collapsed');
+}
+function toggleDrawer() {
+  document.getElementById('filter-drawer').classList.toggle('open');
+  document.getElementById('drawer-overlay').classList.toggle('open');
+}
+function clearAllFilters() {
+  if (typeof onEmpresaFilter === 'function') {
+    var allBtn = document.querySelector('.emp-btn[data-emp=""]');
+    if (allBtn) onEmpresaFilter(allBtn);
+  }
+  if (typeof onYearChange === 'function') {
+    var fy = document.getElementById('fyear');
+    if (fy) { fy.selectedIndex = 0; onYearChange(); }
+  }
+  var fest = document.getElementById('fest');
+  if (fest) { fest.value = ''; }
+  var mmin = document.getElementById('monto-min');
+  var mmax = document.getElementById('monto-max');
+  if (mmin) mmin.value = '';
+  if (mmax) mmax.value = '';
+  if (typeof selectedWeeks !== 'undefined') selectedWeeks.clear();
+  if (typeof pg !== 'undefined') pg = 0;
+  if (typeof render === 'function') render();
+  if (typeof buildWeekPills === 'function') buildWeekPills();
+  updateActiveChips();
+}
+function updateActiveChips() {
+  var chips = document.getElementById('active-chips');
+  var badge = document.getElementById('filter-badge');
+  var btn   = document.getElementById('btn-filter');
+  if (!chips) return;
+  var html = '';
+  var count = 0;
+  /* Empresa */
+  if (typeof selEmpresas !== 'undefined') {
+    selEmpresas.forEach(function(e) {
+      count++;
+      html += '<div class="active-chip">' + e +
+        '<button onclick="var b=document.querySelector(\'.emp-btn[data-emp=\\\'' + e + '\\\']\');if(b)onEmpresaFilter(b);updateActiveChips()">×</button></div>';
+    });
+  }
+  /* Mes */
+  var fmonth = document.getElementById('fmonth');
+  if (fmonth && fmonth.value) {
+    count++;
+    var mLabel = fmonth.options[fmonth.selectedIndex].text;
+    html += '<div class="active-chip">' + mLabel +
+      '<button onclick="document.getElementById(\'fmonth\').value=\'\';onMonthChange();updateActiveChips()">×</button></div>';
+  }
+  /* Estado */
+  var fest = document.getElementById('fest');
+  if (fest && fest.value) {
+    count++;
+    html += '<div class="active-chip">' + fest.value +
+      '<button onclick="document.getElementById(\'fest\').value=\'\';pg=0;render();updateActiveChips()">×</button></div>';
+  }
+  /* Monto */
+  var mn = document.getElementById('monto-min');
+  var mx = document.getElementById('monto-max');
+  if ((mn && mn.value) || (mx && mx.value)) {
+    count++;
+    var mLabel2 = '$' + (mn&&mn.value?mn.value:'0') + ' — ' + (mx&&mx.value?'$'+mx.value:'∞');
+    html += '<div class="active-chip">' + mLabel2 +
+      '<button onclick="document.getElementById(\'monto-min\').value=\'\';document.getElementById(\'monto-max\').value=\'\';pg=0;render();updateActiveChips()">×</button></div>';
+  }
+  chips.innerHTML = html;
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline' : 'none'; }
+  if (btn)   { btn.classList.toggle('has-filters', count > 0); }
+}
 </script>
 
 <!-- ── Script de integración con la API Flask — Fase 2 ── -->
@@ -1039,7 +1189,7 @@ function copyId(el, id) {
   /* ── Override: buildWeekPills dinámica ── */
   window.buildWeekPills = function buildWeekPills() {
     rebuildWEEKS();
-    var c = document.getElementById('week-pills');
+    var c = document.getElementById('drawer-week-pills');
     c.innerHTML = '';
     var visible = orders.filter(function(o){
       return (!selEmpresas.size || selEmpresas.has(o.empresa)) &&
@@ -1075,7 +1225,11 @@ function copyId(el, id) {
   /* ── Override: filtered con año/mes/empresa ── */
   window.filtered = function filtered() {
     var q  = document.getElementById('q').value.toLowerCase();
-    var fe = document.getElementById('fest').value;
+    var fe  = document.getElementById('fest').value;
+    var mnEl = document.getElementById('monto-min');
+    var mxEl = document.getElementById('monto-max');
+    var mn  = mnEl && mnEl.value !== '' ? parseFloat(mnEl.value) : null;
+    var mx  = mxEl && mxEl.value !== '' ? parseFloat(mxEl.value) : null;
     return orders.filter(function(o) {
       return (!selEmpresas.size || selEmpresas.has(o.empresa)) &&
              (!selYear  || o._year  === selYear)  &&
@@ -1084,7 +1238,9 @@ function copyId(el, id) {
              (!q || o.id.toLowerCase().includes(q) || o.factura.toLowerCase().includes(q) ||
               o.client.toLowerCase().includes(q) ||
               (o.transporte && o.transporte.chofer && o.transporte.chofer.toLowerCase().includes(q))) &&
-             (!fe || o.estado===fe);
+             (!fe || o.estado===fe) &&
+             (mn === null || o.monto >= mn) &&
+             (mx === null || o.monto <= mx);
     });
   }
 
@@ -1179,6 +1335,8 @@ function copyId(el, id) {
 
   /* ── Filtro empresa (multi-select) + logo ── */
   var selEmpresas = new Set();
+  var selMontoMin = null;
+  var selMontoMax = null;
   var EMPRESA_LOGOS = {
     'BEVAL':   '/logos/Beval.png',
     'FEBECA':  '/logos/Febeca.png',
@@ -1209,6 +1367,7 @@ function copyId(el, id) {
     });
     updateHeaderLogo();
     selectedWeeks.clear(); pg = 0; buildWeekPills(); render();
+    updateActiveChips();
   };
 
   /* ── Selectores año/mes ── */
@@ -1270,11 +1429,13 @@ function copyId(el, id) {
     selYear = parseInt(document.getElementById('fyear').value);
     selectedWeeks.clear(); selMonth = null;
     refreshMonthSelector(); pg=0; buildWeekPills(); render();
+    updateActiveChips();
   };
   window.onMonthChange = function() {
     var v = document.getElementById('fmonth').value;
     selMonth = v ? parseInt(v) : null;
     selectedWeeks.clear(); pg=0; buildWeekPills(); render();
+    updateActiveChips();
   };
 
   /* ── Override: renderStages — pipeline card ── */
@@ -1403,6 +1564,71 @@ function copyId(el, id) {
     });
 })();
 </script>
+
+<!-- ── Drawer overlay ── -->
+<div id="drawer-overlay" onclick="toggleDrawer()"></div>
+
+<!-- ── Filter drawer ── -->
+<div id="filter-drawer">
+  <div class="drawer-hdr">
+    <span class="drawer-title">Filtros</span>
+    <button class="drawer-close" onclick="toggleDrawer()">&#x2715;</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Empresa -->
+    <div>
+      <div class="drawer-sec-title">Empresa</div>
+      <div class="emp-btns" id="emp-btns" style="flex-wrap:wrap;gap:6px">
+        <button class="emp-btn active" data-emp="" onclick="onEmpresaFilter(this)">
+          <img src="/logos/Mayoreo.png" alt="Todas"><span>Todas</span>
+        </button>
+        <button class="emp-btn" data-emp="BEVAL" onclick="onEmpresaFilter(this)">
+          <img src="/logos/Beval.png" alt="Beval"><span>Beval</span>
+        </button>
+        <button class="emp-btn" data-emp="FEBECA" onclick="onEmpresaFilter(this)">
+          <img src="/logos/Febeca.png" alt="Febeca"><span>Febeca</span>
+        </button>
+        <button class="emp-btn" data-emp="SILLACA" onclick="onEmpresaFilter(this)">
+          <img src="/logos/Sillaca.png" alt="Sillaca"><span>Sillaca</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Período -->
+    <div>
+      <div class="drawer-sec-title">Período</div>
+      <div style="display:flex;gap:8px;margin-bottom:.75rem">
+        <select id="fyear" onchange="onYearChange()" style="flex:1"></select>
+        <select id="fmonth" onchange="onMonthChange()" style="flex:2"></select>
+      </div>
+      <div id="drawer-week-pills"></div>
+      <button class="week-clear" id="wclear" style="display:none;margin-top:6px" onclick="clearWeeks()">Limpiar semanas</button>
+    </div>
+
+    <!-- Estado -->
+    <div>
+      <div class="drawer-sec-title">Estado del pedido</div>
+      <select id="fest" onchange="pg=0;render();updateActiveChips()" style="width:100%">
+        <option value="">Todos los estados</option>
+      </select>
+    </div>
+
+    <!-- Monto -->
+    <div>
+      <div class="drawer-sec-title">Monto total ($)</div>
+      <div class="monto-row">
+        <input type="number" id="monto-min" placeholder="Mín" min="0" oninput="pg=0;render();updateActiveChips()">
+        <span>—</span>
+        <input type="number" id="monto-max" placeholder="Máx" min="0" oninput="pg=0;render();updateActiveChips()">
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-clear-all" onclick="clearAllFilters()">Limpiar todos los filtros</button>
+  </div>
+</div>
 
 </div><!-- /.page-body -->
 
