@@ -46,6 +46,35 @@ CSV_TO_DB = {
 }
 DB_TO_CSV = {v: k for k, v in CSV_TO_DB.items()}
 
+def sb_fetch_all(table):
+    """Trae TODOS los registros de una tabla paginando de 1000 en 1000."""
+    import requests as req
+    all_rows = []
+    page = 0
+    page_size = 1000
+    while True:
+        start = page * page_size
+        end   = start + page_size - 1
+        r = req.get(
+            f"{SUPABASE_URL}/rest/v1/{table}?select=*",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Range": f"{start}-{end}",
+                "Range-Unit": "items",
+                "Prefer": "count=none"
+            },
+            timeout=30
+        )
+        if r.status_code not in (200, 206):
+            raise Exception(f"Supabase HTTP {r.status_code}: {r.text[:200]}")
+        batch = r.json()
+        all_rows.extend(batch)
+        if len(batch) < page_size:
+            break
+        page += 1
+    return all_rows
+
 def db_pedido_to_csv(row):
     """Convierte fila de Supabase al formato de columnas que espera el frontend."""
     return {csv_col: row.get(db_col, '') for db_col, csv_col in DB_TO_CSV.items()}
@@ -102,8 +131,9 @@ def api_pedidos():
     sb = get_supabase()
     if sb:
         try:
-            result = sb.table("pedidos").select("*").execute()
-            return jsonify([db_pedido_to_csv(r) for r in result.data])
+            rows = sb_fetch_all("pedidos")
+            print(f"[/api/pedidos] {len(rows)} pedidos desde Supabase")
+            return jsonify([db_pedido_to_csv(r) for r in rows])
         except Exception as e:
             print(f"[Supabase /api/pedidos] {e} — usando CSV")
 
@@ -124,8 +154,9 @@ def api_lineas():
     sb = get_supabase()
     if sb:
         try:
-            result = sb.table("lineas").select("*").execute()
-            return jsonify([db_linea_to_csv(r) for r in result.data])
+            rows = sb_fetch_all("lineas")
+            print(f"[/api/lineas] {len(rows)} lineas desde Supabase")
+            return jsonify([db_linea_to_csv(r) for r in rows])
         except Exception as e:
             print(f"[Supabase /api/lineas] {e} — usando CSV")
 
