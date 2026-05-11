@@ -223,9 +223,14 @@ tr:hover td{background:var(--color-background-secondary)}
 <div class="pipeline-wrap">
   <div class="pipeline-hdr">
     <span class="pipeline-title">Pipeline de pedidos</span>
-    <span class="pipeline-total" id="kp-ord">—</span>
+    <span class="pipeline-total" id="kp-ord"><span class="skel skel-num" style="width:60px">&nbsp;</span></span>
   </div>
-  <div class="pipeline-stages" id="stages"></div>
+  <div class="pipeline-stages" id="stages">
+    <div class="pstage-skel"><span class="skel skel-text" style="width:70px;margin-bottom:10px;display:block">&nbsp;</span><span class="skel skel-num" style="width:50px;display:block">&nbsp;</span></div>
+    <div class="pstage-skel"><span class="skel skel-text" style="width:70px;margin-bottom:10px;display:block">&nbsp;</span><span class="skel skel-num" style="width:50px;display:block">&nbsp;</span></div>
+    <div class="pstage-skel"><span class="skel skel-text" style="width:70px;margin-bottom:10px;display:block">&nbsp;</span><span class="skel skel-num" style="width:50px;display:block">&nbsp;</span></div>
+    <div class="pstage-skel"><span class="skel skel-text" style="width:70px;margin-bottom:10px;display:block">&nbsp;</span><span class="skel skel-num" style="width:50px;display:block">&nbsp;</span></div>
+  </div>
 </div>
 <!-- KPI spans ocultos para compatibilidad con render() original -->
 <span id="kp-cli" style="display:none"></span>
@@ -242,7 +247,13 @@ tr:hover td{background:var(--color-background-secondary)}
       <button class="week-clear" id="wclear" style="display:none" onclick="clearWeeks()">Limpiar semanas</button>
     </div>
   </div>
-  <div class="week-pills" id="week-pills"></div>
+  <div class="week-pills" id="week-pills">
+    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
+    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
+    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
+    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
+    <div class="skel" style="width:90px;height:54px;border-radius:10px;flex-shrink:0">&nbsp;</div>
+  </div>
 </div>
 
 <div class="filter-row">
@@ -267,7 +278,11 @@ tr:hover td{background:var(--color-background-secondary)}
     <th style="width:45px"></th>
   </tr></thead>
   <tbody id="tbody">
-    <tr><td colspan="8" style="text-align:center;color:var(--color-text-secondary);padding:1.5rem">Cargando datos...</td></tr>
+    <tr class="skel-row"><td><span class="skel skel-text" style="width:140px">&nbsp;</span></td><td><span class="skel skel-text" style="width:120px">&nbsp;</span></td><td><span class="skel skel-text" style="width:90px">&nbsp;</span></td><td><span class="skel skel-badge">&nbsp;</span></td><td><span class="skel skel-text" style="width:80px">&nbsp;</span></td><td><span class="skel skel-text" style="width:40px">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td></td></tr>
+    <tr class="skel-row"><td><span class="skel skel-text" style="width:155px">&nbsp;</span></td><td><span class="skel skel-text" style="width:100px">&nbsp;</span></td><td><span class="skel skel-text" style="width:80px">&nbsp;</span></td><td><span class="skel skel-badge">&nbsp;</span></td><td><span class="skel skel-text" style="width:90px">&nbsp;</span></td><td><span class="skel skel-text" style="width:40px">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td></td></tr>
+    <tr class="skel-row"><td><span class="skel skel-text" style="width:130px">&nbsp;</span></td><td><span class="skel skel-text" style="width:130px">&nbsp;</span></td><td><span class="skel skel-text" style="width:85px">&nbsp;</span></td><td><span class="skel skel-badge">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td><span class="skel skel-text" style="width:40px">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td></td></tr>
+    <tr class="skel-row"><td><span class="skel skel-text" style="width:148px">&nbsp;</span></td><td><span class="skel skel-text" style="width:110px">&nbsp;</span></td><td><span class="skel skel-text" style="width:90px">&nbsp;</span></td><td><span class="skel skel-badge">&nbsp;</span></td><td><span class="skel skel-text" style="width:85px">&nbsp;</span></td><td><span class="skel skel-text" style="width:40px">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td></td></tr>
+    <tr class="skel-row"><td><span class="skel skel-text" style="width:138px">&nbsp;</span></td><td><span class="skel skel-text" style="width:125px">&nbsp;</span></td><td><span class="skel skel-text" style="width:80px">&nbsp;</span></td><td><span class="skel skel-badge">&nbsp;</span></td><td><span class="skel skel-text" style="width:75px">&nbsp;</span></td><td><span class="skel skel-text" style="width:40px">&nbsp;</span></td><td><span class="skel skel-text" style="width:70px">&nbsp;</span></td><td></td></tr>
   </tbody>
 </table>
 </div>
@@ -770,6 +785,26 @@ render();
   .chev-dots span:nth-child(3){animation-delay:.44s}
   .chev-dots span:nth-child(4){animation-delay:.66s}
   @keyframes cdot{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+
+  /* ── Skeleton loading ── */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+  }
+  .skel {
+    display: inline-block;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .skel-text  { height: 13px; }
+  .skel-num   { height: 28px; border-radius: 6px; }
+  .skel-badge { height: 20px; border-radius: 20px; width: 72px; }
+  .skel-row td { padding: 10px 12px; }
+  /* Pipeline skeleton */
+  .pstage-skel { padding: .85rem 1rem .9rem; border-right: 1px solid var(--color-border-secondary); }
+  .pstage-skel:last-child { border-right: none; }
 
   /* ═══════════════════════════════════════
      RESPONSIVE — MOBILE  (≤ 640 px)
