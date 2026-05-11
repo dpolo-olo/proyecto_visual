@@ -29,6 +29,15 @@ def logos(filename):
     )
 
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), "templates", "logos"),
+        "Mayoreo.png",
+        mimetype="image/png"
+    )
+
+
 @app.route("/")
 def index():
     return render_template("order_tracking_v6_dateranges.html")
