@@ -196,7 +196,11 @@ tr:hover td{background:var(--color-background-secondary)}
 <!-- ── Loading overlay ── -->
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Cargando datos...</div>
+  <div class="loading-text" id="loading-text">Conectando...</div>
+  <div class="loading-bar-wrap">
+    <div class="loading-bar-fill" id="loading-bar"></div>
+  </div>
+  <div class="loading-pct" id="loading-pct">0%</div>
 </div>
 
 <!-- ── Header de página ── -->
@@ -1050,6 +1054,26 @@ render();
     opacity: 0;
     pointer-events: none;
   }
+  .loading-bar-wrap {
+    width: 220px;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .loading-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .loading-pct {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-top: -8px;
+  }
   .loading-spinner {
     width: 44px; height: 44px;
     border: 3px solid #CBD5E1;
@@ -1642,17 +1666,35 @@ function updateActiveChips() {
     }).join('');
   }
 
-  /* ── Fetch principal (pedidos + líneas en paralelo) ── */
-  Promise.all([
-    fetch('/api/pedidos').then(function(r){
+  /* ── Helpers barra de progreso ── */
+  function setProgress(pct, text) {
+    var bar  = document.getElementById('loading-bar');
+    var lbl  = document.getElementById('loading-pct');
+    var txt  = document.getElementById('loading-text');
+    if (bar) bar.style.width = pct + '%';
+    if (lbl) lbl.textContent = pct + '%';
+    if (txt) txt.textContent = text;
+  }
+
+  /* ── Fetch principal (pedidos primero, luego líneas) ── */
+  setProgress(5, 'Conectando con Supabase...');
+
+  var data, lineas;
+  fetch('/api/pedidos')
+    .then(function(r) {
       if (!r.ok) return r.json().then(function(e){ throw new Error(e.error||r.status); });
       return r.json();
-    }),
-    fetch('/api/lineas').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; })
-  ])
-    .then(function(results) {
-      var data   = results[0];
-      var lineas = results[1];
+    })
+    .then(function(pedidosData) {
+      data = pedidosData;
+      setProgress(50, 'Pedidos cargados — cargando líneas...');
+      return fetch('/api/lineas').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; });
+    })
+    .then(function(lineasData) {
+      lineas = lineasData;
+      setProgress(90, 'Procesando datos...');
+    })
+    .then(function() {
 
       /* Construir mapa de líneas por pedido */
       var lineMap = new Map();
@@ -1729,9 +1771,12 @@ function updateActiveChips() {
       populatePeriodSelectors();
       buildWeekPills();
       render();
+      setProgress(100, 'Listo');
       /* Ocultar overlay de carga */
-      var ov = document.getElementById('loading-overlay');
-      if (ov) ov.classList.add('hide');
+      setTimeout(function() {
+        var ov = document.getElementById('loading-overlay');
+        if (ov) ov.classList.add('hide');
+      }, 300);
     })
     .catch(function(err) {
       console.error('Error al cargar pedidos:', err);
