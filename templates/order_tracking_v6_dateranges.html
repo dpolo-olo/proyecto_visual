@@ -482,8 +482,6 @@ function showDet(id){
       <div class="meta-f"><label>Estado documento</label><span class="badge ${bc(o.estado)}">${o.estado}</span></div>
       <div class="meta-f"><label>Monto total</label><span style="font-weight:500">$${o.monto.toLocaleString("es")}</span></div>
     </div>
-    <p class="sec-title">Tiempo por etapa</p>
-    <div class="tl-h">${tlSteps}</div>
     <p class="sec-title">Transporte y chofer</p>
     ${tblock}
     <p class="sec-title">Líneas del pedido</p>
@@ -1483,8 +1481,6 @@ function updateActiveChips() {
         '<div class="meta-f"><label>Monto total</label><span style="font-weight:500">$'+o.monto.toLocaleString('es')+'</span></div>' +
         '<div class="meta-f"><label>Zona de venta</label><span>'+o.zona+'</span></div>' +
       '</div>' +
-      '<p class="sec-title">Tiempo por etapa</p>' +
-      tlSteps +
       '<p class="sec-title">Transporte</p>' +
       tblock +
       '<p class="sec-title">Líneas del pedido</p>' +
