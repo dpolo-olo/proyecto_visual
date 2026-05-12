@@ -1,13 +1,12 @@
 from flask import Flask, render_template, jsonify, send_from_directory, request
-import pandas as pd
 import os
 
 app = Flask(__name__)
 
 # ── Supabase config ───────────────────────────────────────────────────────────
-SUPABASE_URL   = os.environ.get("SUPABASE_URL",   "https://ttsfodcmrzqaoisikdzn.supabase.co")
-SUPABASE_KEY   = os.environ.get("SUPABASE_KEY",   "")   # secret key — se pone en Railway
-INGEST_SECRET  = os.environ.get("INGEST_SECRET",  "")   # clave que usara Power Automate
+SUPABASE_URL  = os.environ.get("SUPABASE_URL",  "https://ttsfodcmrzqaoisikdzn.supabase.co")
+SUPABASE_KEY  = os.environ.get("SUPABASE_KEY",  "")
+INGEST_SECRET = os.environ.get("INGEST_SECRET", "")
 
 _sb = None
 def get_supabase():
@@ -21,10 +20,10 @@ def get_supabase():
         _sb = create_client(SUPABASE_URL, SUPABASE_KEY)
         return _sb
     except Exception as e:
-        print(f"[Supabase] Error al conectar: {e}")
+        print(f"[Supabase] Error: {e}")
         return None
 
-# ── Mapeo columnas CSV ↔ Supabase ─────────────────────────────────────────────
+# ── Mapeo columnas CSV <-> Supabase ───────────────────────────────────────────
 CSV_TO_DB = {
     'NUMERO PEDIDO':        'id',
     'EMPRESA':              'empresa',
@@ -76,36 +75,18 @@ def sb_fetch_all(table):
     return all_rows
 
 def db_pedido_to_csv(row):
-    """Convierte fila de Supabase al formato de columnas que espera el frontend."""
     return {csv_col: row.get(db_col, '') for db_col, csv_col in DB_TO_CSV.items()}
 
 def db_linea_to_csv(row):
     return {
-        'NUMERO PEDIDO':    row.get('numero_pedido', ''),
-        'COD-ART':          row.get('cod_art', ''),
-        'NUMERO FACTURA':   '',
-        'CANT PEDIDA':      row.get('cant_pedida', 0),
-        'CANTIDAD ART':     row.get('cantidad_art', 0),
-        'ESTATUS LINEA':    row.get('estatus_linea', ''),
-        'ESTATUS LINEA FDV':row.get('estatus_fdv', ''),
-        'VENTA DOLARES':    row.get('venta_dolares', 0),
+        'NUMERO PEDIDO':     row.get('numero_pedido', ''),
+        'COD-ART':           row.get('cod_art', ''),
+        'CANT PEDIDA':       row.get('cant_pedida', 0),
+        'CANTIDAD ART':      row.get('cantidad_art', 0),
+        'ESTATUS LINEA':     row.get('estatus_linea', ''),
+        'ESTATUS LINEA FDV': row.get('estatus_fdv', ''),
+        'VENTA DOLARES':     row.get('venta_dolares', 0),
     }
-
-# ── CSV fallback ──────────────────────────────────────────────────────────────
-def find_csv(filename):
-    candidates = []
-    current = os.path.dirname(os.path.abspath(__file__))
-    for _ in range(6):
-        candidate = os.path.join(current, filename)
-        if os.path.exists(candidate):
-            candidates.append(candidate)
-        parent = os.path.dirname(current)
-        if parent == current:
-            break
-        current = parent
-    if not candidates:
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
-    return max(candidates, key=os.path.getmtime)
 
 # ── Rutas estáticas ───────────────────────────────────────────────────────────
 @app.route("/logos/<filename>")
@@ -128,53 +109,32 @@ def index():
 # ── API pedidos ───────────────────────────────────────────────────────────────
 @app.route("/api/pedidos")
 def api_pedidos():
-    sb = get_supabase()
-    if sb:
-        try:
-            rows = sb_fetch_all("pedidos")
-            print(f"[/api/pedidos] {len(rows)} pedidos desde Supabase")
-            return jsonify([db_pedido_to_csv(r) for r in rows])
-        except Exception as e:
-            print(f"[Supabase /api/pedidos] {e} — usando CSV")
-
-    # Fallback CSV
+    if not SUPABASE_KEY:
+        return jsonify({"error": "Supabase no configurado — agrega SUPABASE_KEY en Railway"}), 500
     try:
-        path = find_csv("datos_pedidos_web.csv")
-        print(f"[/api/pedidos CSV] {path}")
-        df = pd.read_csv(path).fillna("")
-        return jsonify(df.to_dict(orient="records"))
-    except FileNotFoundError:
-        return jsonify({"error": "Sin datos. Ejecuta Script_testin_v1.py o configura Supabase."}), 404
+        rows = sb_fetch_all("pedidos")
+        print(f"[/api/pedidos] {len(rows)} pedidos desde Supabase")
+        return jsonify([db_pedido_to_csv(r) for r in rows])
     except Exception as e:
+        print(f"[/api/pedidos] Error: {e}")
         return jsonify({"error": str(e)}), 500
 
 # ── API lineas ────────────────────────────────────────────────────────────────
 @app.route("/api/lineas")
 def api_lineas():
-    sb = get_supabase()
-    if sb:
-        try:
-            rows = sb_fetch_all("lineas")
-            print(f"[/api/lineas] {len(rows)} lineas desde Supabase")
-            return jsonify([db_linea_to_csv(r) for r in rows])
-        except Exception as e:
-            print(f"[Supabase /api/lineas] {e} — usando CSV")
-
-    # Fallback CSV
+    if not SUPABASE_KEY:
+        return jsonify({"error": "Supabase no configurado"}), 500
     try:
-        path = find_csv("datos_lineas_web.csv")
-        print(f"[/api/lineas CSV] {path}")
-        df = pd.read_csv(path).fillna("")
-        return jsonify(df.to_dict(orient="records"))
-    except FileNotFoundError:
-        return jsonify([])
+        rows = sb_fetch_all("lineas")
+        print(f"[/api/lineas] {len(rows)} lineas desde Supabase")
+        return jsonify([db_linea_to_csv(r) for r in rows])
     except Exception as e:
+        print(f"[/api/lineas] Error: {e}")
         return jsonify({"error": str(e)}), 500
 
-# ── Endpoint de ingestión para Power Automate ─────────────────────────────────
+# ── Endpoint de ingestion para Power Automate ─────────────────────────────────
 @app.route("/api/ingest", methods=["POST"])
 def api_ingest():
-    # Verificar clave de acceso
     if INGEST_SECRET and request.headers.get("X-API-Key") != INGEST_SECRET:
         return jsonify({"error": "No autorizado"}), 401
 
@@ -188,7 +148,7 @@ def api_ingest():
 
     ingested = {}
 
-    # Ingestar pedidos
+    # ── Pedidos
     if "pedidos" in data:
         rows = []
         for row in data["pedidos"]:
@@ -201,12 +161,15 @@ def api_ingest():
         if rows:
             sb.table("pedidos").upsert(rows, on_conflict="id").execute()
             ingested["pedidos"] = len(rows)
-            print(f"[/api/ingest] {len(rows)} pedidos actualizados en Supabase")
+            print(f"[/api/ingest] {len(rows)} pedidos actualizados")
 
-    # Ingestar lineas
+    # ── Lineas
     if "lineas" in data:
         rows = []
-        for row in data["lineas"]:
+        for raw in data["lineas"]:
+            # Power BI retorna columnas como 'TABLA[COLUMNA]' en SUMMARIZECOLUMNS
+            # Normalizamos: 'LINEA_MAYOREO_DETALLADO[NUMERO PEDIDO]' -> 'NUMERO PEDIDO'
+            row = {k.split('[')[-1].rstrip(']'): v for k, v in raw.items()}
             pid = str(row.get('NUMERO PEDIDO') or '').strip()
             if not pid:
                 continue
@@ -220,11 +183,13 @@ def api_ingest():
                 'venta_dolares': float(row.get('VENTA DOLARES') or 0),
             })
         if rows:
-            pids = list({r['numero_pedido'] for r in rows})
-            sb.table("lineas").delete().in_("numero_pedido", pids).execute()
-            sb.table("lineas").insert(rows).execute()
+            # Borrar todas las lineas y reinsertar (refresh completo desde Power BI)
+            sb.table("lineas").delete().gte("id", 1).execute()
+            batch_size = 500
+            for i in range(0, len(rows), batch_size):
+                sb.table("lineas").insert(rows[i:i+batch_size]).execute()
             ingested["lineas"] = len(rows)
-            print(f"[/api/ingest] {len(rows)} lineas actualizadas en Supabase")
+            print(f"[/api/ingest] {len(rows)} lineas actualizadas")
 
     return jsonify({"status": "ok", "ingested": ingested})
 

@@ -325,7 +325,7 @@ let WEEKS = [];
 /* ── Array vacío: los datos reales llegan vía fetch ── */
 let orders=[];
 
-const PER=5; let pg=0;
+const PER=40; let pg=0;
 let selectedWeeks=new Set();
 const fmtMin=m=>m==null?"—":m<60?m+"min":Math.floor(m/60)+"h "+(m%60>0?m%60+"min":"");
 const totalMin=o=>o.durMin.filter(x=>x!=null).reduce((a,b)=>a+b,0);
@@ -351,6 +351,7 @@ function countByWeek(code){return orders.filter(o=>o.semana===code).length;}
 
 function buildWeekPills(){
   const c=document.getElementById("week-pills");
+  if(!c) return;
   c.innerHTML="";
   const all=document.createElement("div");
   all.className="wpill-all"+(selectedWeeks.size===0?" active":"");
