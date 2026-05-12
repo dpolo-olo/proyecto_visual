@@ -464,7 +464,7 @@ function showDet(id){
       <div class="tc-mf"><label>Km recorridos</label><span>${o.transporte.kmRecorridos} km</span></div>
     </div>`:`<div style="font-size:12px;color:var(--color-text-secondary);padding:.5rem 0">Sin transporte asignado.</div>`;
   const lineRows=o.lines.map(l=>`<tr><td>${l.art}</td><td style="text-align:center">${l.qped}</td><td style="text-align:center">${l.qfact}</td><td style="text-align:center">${l.qped-l.qfact}</td><td><span class="badge ${bl(l.est)}">${l.est}</span></td></tr>`).join(
-    "")||`<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin detalle de líneas disponible en esta versión.</td></tr>`;
+    "")||`<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas registradas para este pedido.</td></tr>`;
   el.innerHTML=`
     <div class="det-head">
       <div>
@@ -1472,7 +1472,7 @@ function updateActiveChips() {
         '<th>Estado FDV</th>' +
         '<th style="text-align:right">Venta $</th>' +
       '</tr></thead><tbody>' +
-        (o.lines.length ? o.lines.map(function(l){
+        (o.lines && o.lines.length ? o.lines.map(function(l){
           var ventaStr = l.venta > 0 ? '$' + l.venta.toLocaleString('es', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
           var fdvBadge = l.estFdv ? '<span class="badge '+bl(l.estFdv)+'">'+l.estFdv+'</span>' : '<span style="color:var(--color-text-secondary)">—</span>';
           return '<tr>' +
@@ -1483,7 +1483,7 @@ function updateActiveChips() {
             '<td>'+fdvBadge+'</td>' +
             '<td style="text-align:right;font-weight:500">'+ventaStr+'</td>' +
           '</tr>';
-        }).join('') : '<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas — ejecuta Script_testin_v1.py para obtenerlas.</td></tr>') +
+        }).join('') : '<tr><td colspan="5" style="color:var(--color-text-secondary);padding:.5rem">Sin líneas registradas.</td></tr>') +
       '</tbody></table></div>' +
       '<p class="sec-title" style="margin-top:1rem">Ubicación del pedido</p>' +
       '<div class="map-demo-note">Vista de demostración — coordenadas reales en proceso</div>' +
