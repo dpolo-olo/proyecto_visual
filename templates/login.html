@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mayoreo — Acceso</title>
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <style>
+    /* ── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-from:  #0a0e1a;
+      --bg-to:    #0d1f3c;
+      --card-bg:  rgba(255,255,255,0.055);
+      --card-border: rgba(255,255,255,0.10);
+      --accent:   #3b82f6;
+      --accent-hover: #2563eb;
+      --text:     #e8edf5;
+      --text-dim: #8594aa;
+      --error-bg: rgba(239,68,68,0.12);
+      --error-border: rgba(239,68,68,0.35);
+      --error-text: #fca5a5;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ── Animated background blobs ─────────────────────────────── */
+    .blobs {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); opacity: 0.18;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 520px; height: 520px; background: #1d4ed8; top: -120px; left: -100px; animation-delay: 0s; }
+    .blob-2 { width: 400px; height: 400px; background: #0ea5e9; bottom: -80px; right: -60px; animation-delay: -6s; }
+    .blob-3 { width: 280px; height: 280px; background: #6366f1; top: 40%; left: 55%; animation-delay: -12s; }
+
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* ── Main layout ─────────────────────────────────────────────── */
+    .page {
+      position: relative; z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 24px 16px;
+    }
+
+    /* ── Card ────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      padding: 48px 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 24px 64px rgba(0,0,0,0.45),
+        0 4px 16px rgba(0,0,0,0.3);
+      animation: slideUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Logo ────────────────────────────────────────────────────── */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .logo-wrap img {
+      height: 56px;
+      filter: drop-shadow(0 2px 12px rgba(59,130,246,0.35));
+    }
+
+    /* ── Heading ─────────────────────────────────────────────────── */
+    .card h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .card p.subtitle {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* ── Divider line ────────────────────────────────────────────── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .divider span {
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ── Google button ───────────────────────────────────────────── */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.93);
+      color: #1f2937;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background 0.2s,
+        box-shadow 0.2s,
+        transform 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      text-decoration: none;
+    }
+    .btn-google:hover {
+      background: #fff;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-google:active { transform: translateY(0); }
+    .btn-google svg { flex-shrink: 0; }
+
+    /* Loading spinner state */
+    .btn-google.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .btn-google .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-top-color: #1d4ed8;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    .btn-google.loading .spinner { display: block; }
+    .btn-google.loading .g-icon  { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error box ───────────────────────────────────────────────── */
+    .error-box {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--error-border);
+      background: var(--error-bg);
+      text-align: left;
+      animation: fadeIn 0.3s ease;
+    }
+    .error-box.visible { display: flex; }
+    .error-box svg { flex-shrink: 0; margin-top: 1px; }
+    .error-box p { font-size: 13.5px; color: var(--error-text); line-height: 1.45; }
+    .error-box strong { font-weight: 600; display: block; margin-bottom: 2px; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Footer: company logos ───────────────────────────────────── */
+    .footer-logos {
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      opacity: 0.55;
+      animation: slideUp 0.7s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .footer-logos img {
+      height: 28px;
+      filter: brightness(0) invert(1);
+      transition: opacity 0.2s;
+    }
+    .footer-logos img:hover { opacity: 0.85; }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+      animation: slideUp 0.7s 0.3s cubic-bezier(0.22,1,0.36,1) both;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="page">
+
+    <!-- Login card -->
+    <div class="card">
+
+      <!-- Logo Mayoreo -->
+      <div class="logo-wrap">
+        <img src="/logos/Mayoreo.png" alt="Mayoreo" />
+      </div>
+
+      <h1>Portal de Seguimiento</h1>
+      <p class="subtitle">Accede con tu cuenta corporativa<br>para ver el estado de tus pedidos.</p>
+
+      <div class="divider"><span>Iniciar sesión</span></div>
+
+      <!-- Google OAuth button -->
+      <button class="btn-google" id="btnGoogle" onclick="signInWithGoogle()">
+        <!-- Google G icon -->
+        <svg class="g-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        <div class="spinner"></div>
+        <span class="btn-label">Continuar con Google</span>
+      </button>
+
+      <!-- Error message -->
+      <div class="error-box" id="errorBox">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p id="errorMsg">
+          <strong>Sin acceso</strong>
+          Tu correo no está registrado en el sistema.
+          Contacta a tu administrador de ventas.
+        </p>
+      </div>
+
+    </div><!-- /card -->
+
+    <!-- Company logos footer -->
+    <div class="footer-logos">
+      <img src="/logos/Beval.png"  alt="Beval"  />
+      <img src="/logos/Febeca.png" alt="Febeca" />
+      <img src="/logos/Sillaca.png" alt="Sillaca"/>
+    </div>
+
+    <p class="footer-note">© 2025 Mayoreo · Todos los derechos reservados</p>
+
+  </div><!-- /page -->
+
+  <script>
+    // ── Supabase config (injected by Flask) ──────────────────────────────────
+    const SUPABASE_URL      = "{{ supabase_url }}";
+    const SUPABASE_ANON_KEY = "{{ supabase_anon_key }}";
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ── Handle OAuth redirect (token in URL hash/query) ──────────────────────
+    async function handleRedirect() {
+      const { data: { session }, error } = await sb.auth.getSession();
+      if (session) {
+        await verifyAndRedirect(session.access_token);
+      }
+    }
+
+    // ── Verify token against /api/me ─────────────────────────────────────────
+    async function verifyAndRedirect(accessToken) {
+      try {
+        const res = await fetch('/api/me', {
+          headers: { 'Authorization': 'Bearer ' + accessToken }
+        });
+        if (res.ok) {
+          // Store token for the main app
+          sessionStorage.setItem('sb_access_token', accessToken);
+          window.location.replace('/');
+        } else {
+          const btn = document.getElementById('btnGoogle');
+          btn.classList.remove('loading');
+          showError('Tu cuenta de Google no tiene acceso al sistema. Contacta a tu administrador de ventas.');
+        }
+      } catch (e) {
+        showError('Error de red. Intenta de nuevo.');
+      }
+    }
+
+    // ── Trigger Google OAuth ─────────────────────────────────────────────────
+    async function signInWithGoogle() {
+      const btn = document.getElementById('btnGoogle');
+      btn.classList.add('loading');
+      document.getElementById('errorBox').classList.remove('visible');
+
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/login',
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+
+      if (error) {
+        btn.classList.remove('loading');
+        showError('No se pudo iniciar la autenticación. Intenta de nuevo.');
+      }
+      // If no error, browser will redirect to Google — keep spinner shown
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      document.getElementById('errorMsg').innerHTML =
+        '<strong>Sin acceso</strong>' + msg;
+      box.classList.add('visible');
+    }
+
+    // ── Auth state listener — catches return from OAuth redirect ─────────────
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+        const btn = document.getElementById('btnGoogle');
+        btn.classList.add('loading');
+        await verifyAndRedirect(session.access_token);
+      }
+    });
+
+    // Run on page load
+    handleRedirect();
+  </script>
+</body>
+</html>

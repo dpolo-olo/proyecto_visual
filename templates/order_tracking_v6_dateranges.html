@@ -189,7 +189,58 @@ tr:hover td{background:var(--color-background-secondary)}
 .pg{display:flex;gap:6px;justify-content:flex-end;align-items:center;font-size:12px;color:var(--color-text-secondary)}
 .pg-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:3px 9px;font-size:11px;cursor:pointer;color:var(--color-text-primary)}
 .pg-btn:disabled{opacity:0.4;cursor:default}
+  /* ── User badge (header) ── */
+  .user-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .user-badge .role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px 3px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .role-pill.superadmin { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .role-pill.admin      { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .role-pill.supervisor { background: #fefce8; color: #a16207; border: 1px solid #fde68a; }
+  .role-pill.vendedor   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .user-badge .user-name {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .btn-logout {
+    border: 1px solid var(--color-border-secondary);
+    background: #fff;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-logout:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+  @media (max-width: 600px) {
+    .user-name { display: none; }
+    .btn-logout { padding: 5px 9px; }
+  }
   </style>
+
+  <!-- Supabase JS v2 (auth client) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -209,6 +260,12 @@ tr:hover td{background:var(--color-background-secondary)}
   <div class="page-header-text">
     <div class="page-header-title">Reporte de Pedidos</div>
     <div class="page-header-sub" id="last-update">Cargando datos...</div>
+  </div>
+  <!-- User info (populated by auth init) -->
+  <div class="user-badge" id="user-badge" style="display:none">
+    <span class="role-pill" id="role-pill"></span>
+    <span class="user-name" id="user-name"></span>
+    <button class="btn-logout" onclick="signOut()">Salir</button>
   </div>
 </header>
 
@@ -1278,6 +1335,88 @@ function updateActiveChips() {
 }
 </script>
 
+<!-- ── Auth init (Supabase Google OAuth) ── -->
+<script>
+(function () {
+  var SUPABASE_URL      = "{{ supabase_url }}";
+  var SUPABASE_ANON_KEY = "{{ supabase_anon_key }}";
+
+  var ROLE_LABELS = {
+    superadmin: { label: '● Súper Admin', cls: 'superadmin' },
+    admin:      { label: '● Admin Ventas', cls: 'admin' },
+    supervisor: { label: '● Supervisor',   cls: 'supervisor' },
+    vendedor:   { label: '● Vendedor',     cls: 'vendedor' },
+  };
+
+  function showUserBadge(info) {
+    var badge = document.getElementById('user-badge');
+    var pill  = document.getElementById('role-pill');
+    var name  = document.getElementById('user-name');
+    if (!badge) return;
+    var rd = ROLE_LABELS[info.role] || { label: info.role, cls: 'vendedor' };
+    pill.textContent = rd.label;
+    pill.className   = 'role-pill ' + rd.cls;
+    name.textContent = info.nombre || info.email || '';
+    badge.style.display = 'flex';
+  }
+
+  // _authReady resolves with the Bearer token once auth is confirmed.
+  // The data-loading IIFE waits on this before fetching.
+  window._authReady = new Promise(function (resolve, reject) {
+
+    function verifyToken(token) {
+      fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function (r) {
+          if (r.status === 401) throw new Error('unauth');
+          return r.json();
+        })
+        .then(function (info) {
+          sessionStorage.setItem('sb_access_token', token);
+          showUserBadge(info);
+          resolve(token);
+        })
+        .catch(function () {
+          sessionStorage.removeItem('sb_access_token');
+          window.location.replace('/login');
+          reject();
+        });
+    }
+
+    // 1) sessionStorage token (set by login.html after OAuth)
+    var stored = sessionStorage.getItem('sb_access_token');
+    if (stored) { verifyToken(stored); return; }
+
+    // 2) Supabase client session (survives page refresh via localStorage)
+    if (typeof supabase === 'undefined' || !SUPABASE_ANON_KEY) {
+      window.location.replace('/login');
+      reject(); return;
+    }
+    var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (session && session.access_token) {
+        verifyToken(session.access_token);
+      } else {
+        window.location.replace('/login');
+        reject();
+      }
+    }).catch(function () {
+      window.location.replace('/login');
+      reject();
+    });
+  });
+
+  // Sign-out — called by "Salir" button
+  window.signOut = function () {
+    sessionStorage.removeItem('sb_access_token');
+    try {
+      var sbOut = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sbOut.auth.signOut().finally(function () { window.location.replace('/login'); });
+    } catch (e) { window.location.replace('/login'); }
+  };
+})();
+</script>
+
 <!-- ── Script de integración con la API Flask — Fase 2 ── -->
 <script>
 (function () {
@@ -1676,19 +1815,27 @@ function updateActiveChips() {
     if (txt) txt.textContent = text;
   }
 
-  /* ── Fetch principal (pedidos primero, luego líneas) ── */
-  setProgress(5, 'Conectando con Supabase...');
+  /* ── Fetch principal (espera confirmación de auth) ── */
+  setProgress(5, 'Verificando sesión...');
 
   var data, lineas;
-  fetch('/api/pedidos?vendedor=SI-450')
-    .then(function(r) {
-      if (!r.ok) return r.json().then(function(e){ throw new Error(e.error||r.status); });
-      return r.json();
-    })
-    .then(function(pedidosData) {
-      data = pedidosData;
-      setProgress(50, 'Pedidos cargados — cargando líneas...');
-      return fetch('/api/lineas').then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; });
+  (window._authReady || Promise.reject(new Error('no auth')))
+    .then(function(token) {
+      var hdrs = { 'Authorization': 'Bearer ' + token };
+      setProgress(15, 'Conectando con Supabase...');
+      return fetch('/api/pedidos', { headers: hdrs })
+        .then(function(r) {
+          if (r.status === 401) { window.location.replace('/login'); throw new Error('No autorizado'); }
+          if (!r.ok) return r.json().then(function(e){ throw new Error(e.error||r.status); });
+          return r.json();
+        })
+        .then(function(pedidosData) {
+          data = pedidosData;
+          setProgress(50, 'Pedidos cargados — cargando líneas...');
+          return fetch('/api/lineas', { headers: hdrs })
+            .then(function(r){ return r.ok ? r.json() : []; })
+            .catch(function(){ return []; });
+        });
     })
     .then(function(lineasData) {
       lineas = lineasData;
