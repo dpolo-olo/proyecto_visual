@@ -168,6 +168,12 @@ def api_ingest():
             if db_row.get('id'):
                 rows.append(db_row)
         if rows:
+            # Deduplicar por id — el DISTINCT del DAX puede generar duplicados
+            # si un pedido tiene múltiples VendedorKey en distintas líneas
+            seen = {}
+            for r in rows:
+                seen[r['id']] = r  # la última fila gana (o la primera con break)
+            rows = list(seen.values())
             sb.table("pedidos").upsert(rows, on_conflict="id").execute()
             ingested["pedidos"] = len(rows)
             vendedor_filled = sum(1 for r in rows if r.get('vendedor_key'))
