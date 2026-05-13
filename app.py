@@ -46,8 +46,10 @@ CSV_TO_DB = {
 }
 DB_TO_CSV = {v: k for k, v in CSV_TO_DB.items()}
 
-def sb_fetch_all(table):
-    """Trae TODOS los registros de una tabla paginando de 1000 en 1000."""
+def sb_fetch_all(table, filters=""):
+    """Trae TODOS los registros de una tabla paginando de 1000 en 1000.
+    filters: string extra para la query, ej. '&vendedor_key=eq.FE-1'
+    """
     import requests as req
     all_rows = []
     page = 0
@@ -56,7 +58,7 @@ def sb_fetch_all(table):
         start = page * page_size
         end   = start + page_size - 1
         r = req.get(
-            f"{SUPABASE_URL}/rest/v1/{table}?select=*",
+            f"{SUPABASE_URL}/rest/v1/{table}?select=*{filters}",
             headers={
                 "apikey": SUPABASE_KEY,
                 "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -113,8 +115,10 @@ def api_pedidos():
     if not SUPABASE_KEY:
         return jsonify({"error": "Supabase no configurado — agrega SUPABASE_KEY en Railway"}), 500
     try:
-        rows = sb_fetch_all("pedidos")
-        print(f"[/api/pedidos] {len(rows)} pedidos desde Supabase")
+        vendedor = request.args.get("vendedor", "").strip()
+        filters = f"&vendedor_key=eq.{vendedor}" if vendedor else ""
+        rows = sb_fetch_all("pedidos", filters)
+        print(f"[/api/pedidos] {len(rows)} pedidos{' vendedor='+vendedor if vendedor else ''}")
         return jsonify([db_pedido_to_csv(r) for r in rows])
     except Exception as e:
         print(f"[/api/pedidos] Error: {e}")
@@ -152,12 +156,6 @@ def api_ingest():
     # ── Pedidos
     if "pedidos" in data:
         raw_pedidos = data["pedidos"]
-        if raw_pedidos:
-            # Normalizar claves: '[COLUMNA]' o 'TABLA[COLUMNA]' -> 'COLUMNA'
-            sample = {k.split('[')[-1].rstrip(']'): v for k, v in raw_pedidos[0].items()}
-            print(f"[/api/ingest] pedidos claves: {list(sample.keys())}")
-            vkey_sample = sample.get('VendedorKey', 'NO ENCONTRADO')
-            print(f"[/api/ingest] VendedorKey ejemplo: {vkey_sample}")
         rows = []
         for raw in raw_pedidos:
             row = {k.split('[')[-1].rstrip(']'): v for k, v in raw.items()}
@@ -176,8 +174,7 @@ def api_ingest():
             rows = list(seen.values())
             sb.table("pedidos").upsert(rows, on_conflict="id").execute()
             ingested["pedidos"] = len(rows)
-            vendedor_filled = sum(1 for r in rows if r.get('vendedor_key'))
-            print(f"[/api/ingest] {len(rows)} pedidos actualizados, {vendedor_filled} con VendedorKey")
+            print(f"[/api/ingest] {len(rows)} pedidos actualizados")
 
     # ── Lineas
     if "lineas" in data:

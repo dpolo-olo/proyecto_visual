@@ -1683,7 +1683,7 @@ function updateActiveChips() {
   setProgress(5, 'Conectando con Supabase...');
 
   var data, lineas;
-  fetch('/api/pedidos')
+  fetch('/api/pedidos?vendedor=FE-1')
     .then(function(r) {
       if (!r.ok) return r.json().then(function(e){ throw new Error(e.error||r.status); });
       return r.json();
