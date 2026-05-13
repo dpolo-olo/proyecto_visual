@@ -1584,12 +1584,11 @@ function updateActiveChips() {
     )).sort(function(a,b){ return b-a; });
 
     var fyear = document.getElementById('fyear');
-    fyear.innerHTML = '';
-    selYear = years[0] || new Date().getFullYear();
+    fyear.innerHTML = '<option value="">Todos los años</option>';
+    selYear = null;
     years.forEach(function(y) {
       var op = document.createElement('option');
       op.value = y; op.textContent = y;
-      if (y === selYear) op.selected = true;
       fyear.appendChild(op);
     });
     refreshMonthSelector();
@@ -1615,7 +1614,7 @@ function updateActiveChips() {
   function refreshMonthSelector() {
     var months = Array.from(new Set(
       orders.filter(function(o){
-        return o._year===selYear && o._month &&
+        return (!selYear || o._year===selYear) && o._month &&
                (!selEmpresas.size || selEmpresas.has(o.empresa));
       }).map(function(o){ return o._month; })
     )).sort(function(a,b){ return a-b; });
@@ -1627,9 +1626,7 @@ function updateActiveChips() {
       op.value = m; op.textContent = MONTHS_ES[m-1];
       fmonth.appendChild(op);
     });
-    var curMonth = new Date().getMonth() + 1;
-    if (months.includes(curMonth)) { fmonth.value = curMonth; selMonth = curMonth; }
-    else selMonth = null;
+    selMonth = null;
   }
 
   window.onYearChange  = function() {
