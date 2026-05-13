@@ -151,8 +151,16 @@ def api_ingest():
 
     # ── Pedidos
     if "pedidos" in data:
+        raw_pedidos = data["pedidos"]
+        if raw_pedidos:
+            # Normalizar claves: '[COLUMNA]' o 'TABLA[COLUMNA]' -> 'COLUMNA'
+            sample = {k.split('[')[-1].rstrip(']'): v for k, v in raw_pedidos[0].items()}
+            print(f"[/api/ingest] pedidos claves: {list(sample.keys())}")
+            vkey_sample = sample.get('VendedorKey', 'NO ENCONTRADO')
+            print(f"[/api/ingest] VendedorKey ejemplo: {vkey_sample}")
         rows = []
-        for row in data["pedidos"]:
+        for raw in raw_pedidos:
+            row = {k.split('[')[-1].rstrip(']'): v for k, v in raw.items()}
             db_row = {}
             for csv_col, db_col in CSV_TO_DB.items():
                 val = row.get(csv_col)
@@ -162,7 +170,8 @@ def api_ingest():
         if rows:
             sb.table("pedidos").upsert(rows, on_conflict="id").execute()
             ingested["pedidos"] = len(rows)
-            print(f"[/api/ingest] {len(rows)} pedidos actualizados")
+            vendedor_filled = sum(1 for r in rows if r.get('vendedor_key'))
+            print(f"[/api/ingest] {len(rows)} pedidos actualizados, {vendedor_filled} con VendedorKey")
 
     # ── Lineas
     if "lineas" in data:
