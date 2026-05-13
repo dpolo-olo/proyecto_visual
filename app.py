@@ -184,11 +184,27 @@ def api_ingest():
                 'venta_dolares': float(row.get('VENTA DOLARES') or 0),
             })
         if rows:
-            # Borrar todas las lineas y reinsertar (refresh completo desde Power BI)
-            sb.table("lineas").delete().gte("id", 1).execute()
-            batch_size = 500
+            import requests as req, json as _json
+            sb_headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+            }
+            # Borrar todas las lineas
+            req.delete(
+                f"{SUPABASE_URL}/rest/v1/lineas?id=gte.1",
+                headers=sb_headers, timeout=60
+            )
+            # Reinsertar en lotes de 1000 via raw HTTP (más rápido que supabase-py)
+            batch_size = 1000
             for i in range(0, len(rows), batch_size):
-                sb.table("lineas").insert(rows[i:i+batch_size]).execute()
+                req.post(
+                    f"{SUPABASE_URL}/rest/v1/lineas",
+                    headers=sb_headers,
+                    data=_json.dumps(rows[i:i+batch_size], default=str),
+                    timeout=60
+                )
             ingested["lineas"] = len(rows)
             print(f"[/api/ingest] {len(rows)} lineas actualizadas")
 
