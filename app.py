@@ -42,6 +42,7 @@ CSV_TO_DB = {
     'FECHA FACTURACION':    'fecha_facturacion',
     'FECHA SALIDA':         'fecha_salida',
     'FECHA_LLEGADA_CLIENTE':'fecha_llegada_cliente',
+    'VendedorKey':          'vendedor_key',
 }
 DB_TO_CSV = {v: k for k, v in CSV_TO_DB.items()}
 

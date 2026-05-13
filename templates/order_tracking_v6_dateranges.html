@@ -277,7 +277,12 @@ tr:hover td{background:var(--color-background-secondary)}
     <option value="">Todos los estados</option>
   </select>
 
-  <!-- Fila 4: Monto -->
+  <!-- Fila 4: Vendedor -->
+  <input type="text" id="fvendedor" placeholder="Vendedor (ej: FE-78)" style="width:140px" oninput="pg=0;render();updateActiveChips()">
+
+  <div class="fi-divider"></div>
+
+  <!-- Fila 5: Monto -->
   <div class="fi-monto">
     <input type="number" id="monto-min" placeholder="$ Desde" min="0" oninput="pg=0;render();updateActiveChips()">
     <input type="number" id="monto-max" placeholder="$ Hasta" min="0" oninput="pg=0;render();updateActiveChips()">
@@ -1402,8 +1407,9 @@ function updateActiveChips() {
 
   /* ── Override: filtered con año/mes/empresa ── */
   window.filtered = function filtered() {
-    var q  = document.getElementById('q').value.toLowerCase();
+    var q   = document.getElementById('q').value.toLowerCase();
     var fe  = document.getElementById('fest').value;
+    var fv  = (document.getElementById('fvendedor') ? document.getElementById('fvendedor').value : '').trim().toLowerCase();
     var mnEl = document.getElementById('monto-min');
     var mxEl = document.getElementById('monto-max');
     var mn  = mnEl && mnEl.value !== '' ? parseFloat(mnEl.value) : null;
@@ -1417,6 +1423,7 @@ function updateActiveChips() {
               o.client.toLowerCase().includes(q) ||
               (o.transporte && o.transporte.chofer && o.transporte.chofer.toLowerCase().includes(q))) &&
              (!fe || o.estado===fe) &&
+             (!fv || o.vendedor.toLowerCase().includes(fv)) &&
              (mn === null || o.monto >= mn) &&
              (mx === null || o.monto <= mx);
     });
@@ -1736,6 +1743,7 @@ function updateActiveChips() {
           ciudad:    row['CIUDAD']         || '',
           estadoGeo: row['ESTADO']         || '',
           zona:      String(row['ZONA DE VENTA'] || ''),
+          vendedor:  (row['VendedorKey']   || '').trim(),
           transporte: hasDriver ? {
             chofer:   conductor,
             empresa:  transp || '—',
