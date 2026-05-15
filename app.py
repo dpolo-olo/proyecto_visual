@@ -13,7 +13,7 @@ INGEST_SECRET     = os.environ.get("INGEST_SECRET",     "")
 # ── Súper-admins: acceso total a las 3 empresas ───────────────────────────────
 SUPER_ADMINS = {
     'dpolo@ologistics.com',
-    'jpalencia@ologistics.com',
+    # 'jpalencia@ologistics.com',  # temporalmente como vendedor para pruebas
     'wgonzalez@mayoreo.biz',
 }
 
