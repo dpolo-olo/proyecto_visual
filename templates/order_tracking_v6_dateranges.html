@@ -1711,20 +1711,9 @@ function updateActiveChips() {
     updateActiveChips();
   };
 
-  /* ── Selectores año/mes ── */
+  /* ── Selectores mes ── */
   function populatePeriodSelectors() {
-    var years = Array.from(new Set(
-      orders.filter(function(o){ return o._year; }).map(function(o){ return o._year; })
-    )).sort(function(a,b){ return b-a; });
-
-    var fyear = document.getElementById('fyear');
-    fyear.innerHTML = '<option value="">Todos los años</option>';
     selYear = null;
-    years.forEach(function(y) {
-      var op = document.createElement('option');
-      op.value = y; op.textContent = y;
-      fyear.appendChild(op);
-    });
     refreshMonthSelector();
     populateEstadoSelector();
   }
@@ -1763,12 +1752,7 @@ function updateActiveChips() {
     selMonth = null;
   }
 
-  window.onYearChange  = function() {
-    selYear = parseInt(document.getElementById('fyear').value);
-    selectedWeeks.clear(); selMonth = null;
-    refreshMonthSelector(); pg=0; buildWeekPills(); render();
-    updateActiveChips();
-  };
+  window.onYearChange  = function() {}; // filtro año eliminado
   window.onMonthChange = function() {
     var v = document.getElementById('fmonth').value;
     selMonth = v ? parseInt(v) : null;
