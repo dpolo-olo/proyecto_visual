@@ -13,8 +13,13 @@ INGEST_SECRET     = os.environ.get("INGEST_SECRET",     "")
 # ── Súper-admins: acceso total a las 3 empresas ───────────────────────────────
 SUPER_ADMINS = {
     'dpolo@ologistics.com',
-    # 'jpalencia@ologistics.com',  # temporalmente como vendedor para pruebas
+    'jpalencia@ologistics.com',
     'wgonzalez@mayoreo.biz',
+}
+
+# ── Vista de prueba: super-admin que ve como vendedor (no se borra con sync) ──
+DEMO_VENDORS = {
+    'jpalencia@ologistics.com': {'vendedor_key': 'SI-450', 'nombre': 'J. Palencia (demo)'},
 }
 
 # ── Supabase client (para upserts complejos) ──────────────────────────────────
@@ -146,6 +151,17 @@ def get_user_info(email):
     vendedores: None = todos | list = VendedorKeys permitidos
     """
     email_lc = email.lower().strip()
+
+    # ── Demo vendedor (super-admin simulando vista de vendedor) ──────────────
+    if email_lc in DEMO_VENDORS:
+        demo = DEMO_VENDORS[email_lc]
+        return {
+            'role':      'vendedor',
+            'vendedores': [demo['vendedor_key']],
+            'nombre':    demo['nombre'],
+            'empresa':   'Demo',
+            'email':     email_lc,
+        }
 
     # ── Súper-admin ───────────────────────────────────────────────────────────
     if email_lc in SUPER_ADMINS:
