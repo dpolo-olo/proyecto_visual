@@ -479,7 +479,7 @@ function render(){
     return`<tr>
       <td><span class="id-copy" onclick="copyId(this,'${o.id.replace(/'/g,"\\'")}')" title="Clic para copiar">${o.id||'—'}</span></td>
       <td>${o.client}</td>
-      <td>${o.factura?`<span class="id-copy" onclick="copyId(this,'${o.factura.replace(/'/g,"\\'")}')  " title="Clic para copiar">${o.factura}</span>`:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
+      <td>${o.factura==='BACKORDER'?'<span style="font-size:10px;font-weight:600;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:1px 6px">Backorder</span>':o.factura?`<span class="id-copy" onclick="copyId(this,'${o.factura.replace(/'/g,"\\'")}')  " title="Clic para copiar">${o.factura}</span>`:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
       <td><span class="badge ${bc(o.estado)}">${o.estado}</span></td>
       <td>${o.transporte?o.transporte.chofer:'<span style="color:var(--color-text-secondary)">Sin asignar</span>'}</td>
       <td style="font-weight:500;letter-spacing:.4px">${o.transporte?o.transporte.placa:"—"}</td>
@@ -1851,7 +1851,7 @@ function updateActiveChips() {
         var art = (row['COD-ART'] || '').trim();
         if (art) lineMap.get(pid).push({
           art:     art,
-          factura: (function(v){ return (!v||v==='BACKORDER'||v.trim()==='') ? '—' : String(v); })(row['NUMERO FACTURA']),
+          factura: (function(v){ if (!v||v.trim()==='') return '—'; v=v.trim(); return v==='BACKORDER'?'Backorder':v; })(row['NUMERO FACTURA']),
           qped:    parseFloat(row['CANT PEDIDA'])      || 0,
           qfact:   parseFloat(row['CANTIDAD ART'])     || 0,
           est:     (row['ESTATUS LINEA']     || '').trim(),
@@ -1875,7 +1875,7 @@ function updateActiveChips() {
           id:        pid,
           empresa:   (row['EMPRESA'] || '').trim(),
           client:    String(row['RAZON SOCIAL']  || ''),
-          factura:   (function(v){ return (!v||v==='BACKORDER'||v.trim()==='') ? '' : String(v); })(row['NUMERO FACTURA']),
+          factura:   (function(v){ if (!v||v.trim()==='') return ''; v=v.trim(); return v==='BACKORDER'?'BACKORDER':v; })(row['NUMERO FACTURA']),
           estado:    mapEstado(row['ESTADO DEL DOCUMENTO']),
           monto:     parseFloat(row['MONTO TOTAL']) || 0,
           semana:    wCode,
