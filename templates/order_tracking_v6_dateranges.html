@@ -1848,7 +1848,7 @@ function updateActiveChips() {
         var conductor = (row['Conductor']  || '').trim();
         var transp    = (row['Transporte'] || '').trim();
         var viaje     = (row['NUMERO VIAJE'] || '').trim();
-        var hasDriver = conductor !== '';
+        var hasDriver = conductor !== '' || viaje !== '';
         var pid = String(row['NUMERO PEDIDO'] || '');
         orders.push({
           id:        pid,
