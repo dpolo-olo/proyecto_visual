@@ -1560,6 +1560,10 @@ function updateActiveChips() {
              (!fv || o.vendedor.toLowerCase().includes(fv)) &&
              (mn === null || o.monto >= mn) &&
              (mx === null || o.monto <= mx);
+    }).sort(function(a, b) {
+      if (!a._fecha) return 1;
+      if (!b._fecha) return -1;
+      return b._fecha - a._fecha;  // más reciente primero
     });
   }
 
