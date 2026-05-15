@@ -323,9 +323,8 @@ tr:hover td{background:var(--color-background-secondary)}
 
   <div class="fi-divider"></div>
 
-  <!-- Fila 2: Período -->
+  <!-- Fila 2: Período (solo mes) -->
   <div class="fi-period">
-    <select id="fyear" onchange="onYearChange()"></select>
     <select id="fmonth" onchange="onMonthChange()"></select>
   </div>
 
@@ -358,12 +357,10 @@ tr:hover td{background:var(--color-background-secondary)}
 <div class="table-wrap">
 <table>
   <thead><tr>
-    <th style="width:185px">N° Pedido</th>
-    <th style="width:175px">Cliente</th>
+    <th style="width:360px">N° Pedido / Cliente</th>
     <th style="width:150px">N° Factura</th>
     <th style="width:88px">Estado</th>
-    <th style="width:100px">Chofer</th>
-    <th style="width:50px">Placa</th>
+    <th style="width:110px">N° Viaje</th>
     <th style="width:100px">Fecha Pedido</th>
     <th style="width:45px"></th>
   </tr></thead>
@@ -477,12 +474,10 @@ function render(){
   document.getElementById("tbody").innerHTML=slice.map(o=>{
     const wk=WEEKS.find(x=>x.code===o.semana);
     return`<tr>
-      <td><span class="id-copy" onclick="copyId(this,'${o.id.replace(/'/g,"\\'")}')" title="Clic para copiar">${o.id||'—'}</span></td>
-      <td>${o.client}</td>
+      <td><span class="id-copy" onclick="copyId(this,'${o.id.replace(/'/g,"\\'")}')" title="Clic para copiar">${o.id||'—'}</span> <span style="color:var(--color-text-secondary);font-size:11px">${o.client}</span></td>
       <td>${o.factura==='BACKORDER'?'<span style="font-size:10px;font-weight:600;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:1px 6px">Backorder</span>':o.factura?`<span class="id-copy" onclick="copyId(this,'${o.factura.replace(/'/g,"\\'")}')  " title="Clic para copiar">${o.factura}</span>`:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
       <td><span class="badge ${bc(o.estado)}">${o.estado}</span></td>
-      <td>${o.transporte?o.transporte.chofer:'<span style="color:var(--color-text-secondary)">Sin asignar</span>'}</td>
-      <td style="font-weight:500;letter-spacing:.4px">${o.transporte?o.transporte.placa:"—"}</td>
+      <td style="font-weight:500;letter-spacing:.4px">${o.transporte?o.transporte.vehiculo:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
       <td style="font-size:11px;font-weight:500">${o._fecha?(String(o._fecha.getDate()).padStart(2,'0')+'/'+(String(o._fecha.getMonth()+1).padStart(2,'0'))+'/'+o._fecha.getFullYear()):'—'}</td>
       <td><button class="btn-det" onclick="showDet('${o.id.replace(/'/g,"\\'")}')">Ver</button></td>
     </tr>`;
