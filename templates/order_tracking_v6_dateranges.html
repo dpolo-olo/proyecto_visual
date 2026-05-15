@@ -479,7 +479,7 @@ function render(){
       <td><span class="badge ${bc(o.estado)}">${o.estado}</span></td>
       <td style="white-space:normal;word-break:break-all">${o.transporte&&o.transporte.vehiculo&&o.transporte.vehiculo!=='—'?`<span class="id-copy" onclick="copyId(this,'${(o.transporte.vehiculo).replace(/'/g,"\\'")}')" title="Clic para copiar" style="font-weight:500;letter-spacing:.4px">${o.transporte.vehiculo}</span>`:'<span style="color:var(--color-text-secondary)">—</span>'}</td>
       <td style="font-size:11px;font-weight:500">${o._fecha?(String(o._fecha.getDate()).padStart(2,'0')+'/'+(String(o._fecha.getMonth()+1).padStart(2,'0'))+'/'+o._fecha.getFullYear()):'—'}</td>
-      <td><button class="btn-det" onclick="showDet('${o.id.replace(/'/g,"\\'")}')">Ver</button></td>
+      <td style="white-space:nowrap"><button class="btn-det" onclick="showDet('${o.id.replace(/'/g,"\\'")}')">Ver</button> <button class="btn-det" style="color:#2563eb;border-color:#bfdbfe" onclick="toggleMap('${o.id.replace(/'/g,"\\'")}')">📍</button></td>
     </tr>`;
   }).join("")||`<tr><td colspan="8" style="text-align:center;color:var(--color-text-secondary);padding:1.5rem">Sin resultados</td></tr>`;
 
@@ -552,34 +552,72 @@ function showDet(id){
       </tr></thead>
       <tbody>${lineRows}</tbody>
     </table></div>
-    <p class="sec-title" style="margin-top:1rem">Ubicación del pedido</p>
-    <div class="map-demo-note">📍 Vista de demostración — coordenadas reales en proceso</div>
-    <div id="det-map" style="height:240px;border-radius:10px;margin-top:.5rem;border:1px solid var(--color-border-secondary)"></div>`;
+  `;
   el.className="detail open";
   el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 
-  // ── Mapa demo ────────────────────────────────────────────────────────────
-  setTimeout(()=>{
-    const mapEl = document.getElementById("det-map");
-    if(!mapEl) return;
-    // Destruir instancia previa si existe
-    if(mapEl._leaflet_id){ mapEl._leaflet_id=null; mapEl.innerHTML=""; }
-    // Coordenadas demo: Barquisimeto, Venezuela (se reemplazarán con datos reales)
-    const lat = 10.0653, lng = -69.3565;
-    const demoMap = L.map("det-map").setView([lat, lng], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-      attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-      maxZoom:18
-    }).addTo(demoMap);
-    const icon = L.divIcon({
-      html:`<div style="background:#2563EB;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(37,99,235,.4)">📦</div>`,
-      iconSize:[32,32], iconAnchor:[16,16], className:""
+// ── Mapa desplegable en fila ──────────────────────────────────────────────────
+window._openMapId = null;
+window._mapInstance = null;
+
+window.toggleMap = function(id) {
+  var existing = document.getElementById('map-row-' + id);
+
+  // Si ya está abierto este, cerrarlo
+  if (existing) {
+    existing.remove();
+    if (window._mapInstance) { window._mapInstance.remove(); window._mapInstance = null; }
+    window._openMapId = null;
+    return;
+  }
+
+  // Cerrar cualquier otro mapa abierto
+  if (window._openMapId) {
+    var old = document.getElementById('map-row-' + window._openMapId);
+    if (old) old.remove();
+    if (window._mapInstance) { window._mapInstance.remove(); window._mapInstance = null; }
+    window._openMapId = null;
+  }
+
+  // Encontrar la fila del pedido en el tbody
+  var tbody = document.getElementById('tbody');
+  var rows = tbody.querySelectorAll('tr');
+  var targetRow = null;
+  rows.forEach(function(r) {
+    if (r.querySelector && r.innerHTML.includes(id.replace(/'/g,"\\'"))) targetRow = r;
+  });
+  if (!targetRow) return;
+
+  // Insertar fila del mapa después
+  var mapRow = document.createElement('tr');
+  mapRow.id = 'map-row-' + id;
+  mapRow.innerHTML = '<td colspan="6" style="padding:0;background:#f8fafc">' +
+    '<div style="padding:.75rem 1rem">' +
+    '<div style="font-size:11px;color:#64748b;margin-bottom:.4rem">📍 Vista de demostración — coordenadas reales pendientes de integración</div>' +
+    '<div id="inline-map-' + id + '" style="height:220px;border-radius:10px;border:1px solid #e2e8f0"></div>' +
+    '</div></td>';
+  targetRow.insertAdjacentElement('afterend', mapRow);
+  window._openMapId = id;
+
+  setTimeout(function() {
+    var mapEl = document.getElementById('inline-map-' + id);
+    if (!mapEl) return;
+    var lat = 10.0653, lng = -69.3565;
+    var m = L.map('inline-map-' + id).setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>', maxZoom: 18
+    }).addTo(m);
+    var icon = L.divIcon({
+      html: '<div style="background:#2563EB;color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(37,99,235,.4)">📦</div>',
+      iconSize:[32,32], iconAnchor:[16,16], className:''
     });
-    L.marker([lat,lng],{icon})
-      .addTo(demoMap)
-      .bindPopup(`<b>${o.id}</b><br><span style="font-size:11px">${o.client}</span><br><span style="font-size:10px;color:#888">Ubicación de demostración</span>`)
+    var o = orders.find(function(x){ return x.id === id; }) || {};
+    L.marker([lat,lng],{icon}).addTo(m)
+      .bindPopup('<b>'+id+'</b><br><span style="font-size:11px">'+(o.client||'')+'</span>')
       .openPopup();
-  }, 150);
+    window._mapInstance = m;
+  }, 100);
 }
 
 buildWeekPills();
