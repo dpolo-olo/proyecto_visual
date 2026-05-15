@@ -19,7 +19,7 @@ SUPER_ADMINS = {
 
 # ── Vista de prueba: super-admin que ve como vendedor (no se borra con sync) ──
 DEMO_VENDORS = {
-    'jpalencia@ologistics.com': {'vendedor_key': 'SI-450', 'nombre': 'J. Palencia (demo)'},
+    'jpalencia@ologistics.com': {'vendedor_key': 'FE-138', 'nombre': 'J. Palencia (demo)'},
 }
 
 # ── Supabase client (para upserts complejos) ──────────────────────────────────
